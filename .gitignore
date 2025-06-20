@@ -1,0 +1,21 @@
+.databricks/
+.claude/
+.goose/
+.pytest_cache/
+.vscode/
+_archive/
+build/
+dist/
+__pycache__/
+*.egg-info
+.venv/
+scratch/**
+!scratch/README.md
+
+# Local environment overrides (includes .env.local)
+*.local
+bundle.json
+notes/
+.DS_Store
+
+src/customer_demos/

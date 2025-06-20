@@ -1,0 +1,21 @@
+# Production environment configuration
+# Inherits from base.yml and overrides specific values
+
+databricks:
+  catalog: "prod"
+  schema: "aigen_default"
+  volume: "sample_data"
+  auto_create_catalog: false
+  auto_create_schema: true
+  auto_create_volume: true
+
+data_generation:
+  default_records: 100000
+  batch_size: 50000
+
+storage:
+  compression: "gzip"
+  write_mode: "append"
+
+logging:
+  level: "WARNING"

@@ -1,0 +1,20 @@
+# Development environment configuration
+# Inherits from base.yml and overrides specific values
+
+databricks:
+  catalog: "dev"
+  schema: "aigen_default"
+  volume: "sample_data"
+  auto_create_catalog: false
+  auto_create_schema: true
+  auto_create_volume: true
+
+data_generation:
+  default_records: 1000
+  
+storage:
+  # Use smaller files in dev for faster iteration
+  write_mode: "overwrite"
+
+logging:
+  level: "DEBUG"

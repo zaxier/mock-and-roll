@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "custom-demo-accelerator"
+version = "0.1.0"
+description = "AI Generated Databricks Demo"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "databricks-connect==16.3.0",
+    "databricks-dlt>=0.3.0",
+    "mimesis>=18.0.0",
+    "pandas>=2.2.3",
+    "pydantic>=2.11.7",
+    "pytest>=8.4.0",
+    "python-dotenv>=1.0.0",
+    "pyyaml>=6.0.2",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src" = ""

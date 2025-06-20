@@ -1,0 +1,29 @@
+# Base configuration with default values
+# These can be overridden by environment-specific configs or environment variables
+
+databricks:
+  catalog: "dev"
+  schema: "aigen_default"
+  volume: "sample_data"
+  auto_create_catalog: false
+  auto_create_schema: true
+  auto_create_volume: true
+
+data_generation:
+  default_records: 1000
+  date_range_days: 365
+  batch_size: 10000
+
+storage:
+  default_format: "parquet"
+  compression: "snappy"
+  write_mode: "overwrite"
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Application settings
+app:
+  name: "aigen-demo"
+  version: "0.1.0"
