@@ -6,11 +6,11 @@ This script helps maintain synchronization between CLAUDE.md and .goosehints fil
 by detecting differences and providing options to resolve them.
 
 Usage:
-    python sync_docs.py                    # Interactive mode
-    python sync_docs.py --dry-run         # Preview only
-    python sync_docs.py --auto-claude     # Auto-use CLAUDE.md as source
-    python sync_docs.py --auto-goose      # Auto-use .goosehints as source
-    python sync_docs.py --help           # Show this help
+    python scripts/sync_docs.py                    # Interactive mode
+    python scripts/sync_docs.py --dry-run         # Preview only
+    python scripts/sync_docs.py --auto-claude     # Auto-use CLAUDE.md as source
+    python scripts/sync_docs.py --auto-goose      # Auto-use .goosehints as source
+    python scripts/sync_docs.py --help           # Show this help
 """
 
 import argparse
@@ -27,7 +27,14 @@ class DocumentSyncer:
     """Handles synchronization between CLAUDE.md and .goosehints files."""
     
     def __init__(self, repo_root: Path = None):
-        self.repo_root = repo_root or Path.cwd()
+        # When running from scripts/ directory, go up one level to repo root
+        if repo_root is None:
+            current_path = Path.cwd()
+            if current_path.name == "scripts":
+                repo_root = current_path.parent
+            else:
+                repo_root = current_path
+        self.repo_root = repo_root
         self.claude_file = self.repo_root / "CLAUDE.md"
         self.goose_file = self.repo_root / ".goosehints"
         self.backup_dir = self.repo_root / ".sync_backups"
