@@ -18,5 +18,6 @@ bundle.json
 notes/
 .DS_Store
 
-src/customer_demos/
+src/customer_demos/*
+!src/customer_demos/.gitkeep
 .sync_backups/
