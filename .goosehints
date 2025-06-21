@@ -326,10 +326,11 @@ transaction_date = generic.datetime.datetime(
 ## File Organization
 - New demos go in `src/customer_demos/<demo_name>/` directory
 - Follow existing implementation patterns of `src/reference_demos` for example `src/reference_demos/sales_demo` dir
-- **REQUIRED**: Each new demo directory must contain exactly these 3 files:
+- **REQUIRED**: Each new demo directory must contain exactly these 4 files:
   1. `__init__.py` - Empty Python package file
-  2. `datasets.py` - Dataset generation and data model definitions
+  2. `__main__.py` - Entry point for running the demo as a module
   3. `main.py` - Main orchestrator and pipeline execution
+  4. `datasets.py` - Dataset generation and data model definitions
 - Do not create additional files unless explicitly required
 
 # Testing and Validation
