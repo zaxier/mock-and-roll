@@ -13,6 +13,7 @@ from core.spark import get_spark
 from core.catalog import ensure_catalog_schema_volume
 from core.io import save_datamodel_to_volume, batch_load_datamodel_from_volume
 from core.logging_config import setup_logging, get_logger
+from core.workspace import get_workspace_schema_url
 
 from .datasets import data_model
 
@@ -83,6 +84,13 @@ def main():
             logger.info(f"Total records in {dataset_name}: {df.count()}")
         
         logger.info("Sales demo pipeline completed successfully")
+        
+        # Generate and display workspace URL
+        try:
+            workspace_url = get_workspace_schema_url(config)
+            logger.info(f"Data available at: {workspace_url}")
+        except Exception as url_error:
+            logger.warning(f"Could not generate workspace URL: {str(url_error)}")
         
     except Exception as e:
         logger.error(f"Sales demo failed: {str(e)}")

@@ -19,3 +19,4 @@ notes/
 .DS_Store
 
 src/customer_demos/
+.sync_backups/
