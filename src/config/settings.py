@@ -150,6 +150,48 @@ def load_dotenv_files(project_root: Path) -> None:
             logger.debug(f"{EMOJI['info']} No environment file found at: {get_relative_path(env_file, project_root)}")
 
 
+def apply_cli_overrides(config: Dict[str, Any], cli_overrides: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Apply command line argument overrides to configuration."""
+    if not cli_overrides:
+        return config
+        
+    logger.debug(f"{EMOJI['config']} Applying CLI argument overrides")
+    
+    # Define CLI argument mappings
+    cli_mappings = {
+        'catalog': ['databricks', 'catalog'],
+        'schema': ['databricks', 'schema'],
+        'volume': ['databricks', 'volume'],
+        'records': ['data_generation', 'default_records'],
+        'format': ['storage', 'default_format'],
+        'log_level': ['logging', 'level'],
+    }
+    
+    result = config.copy()
+    overrides_applied = 0
+    
+    for cli_arg, config_path in cli_mappings.items():
+        cli_value = cli_overrides.get(cli_arg)
+        if cli_value is not None:
+            # Navigate to the nested config location
+            current = result
+            for key in config_path[:-1]:
+                current = current.setdefault(key, {})
+            
+            # Convert value to appropriate type
+            final_key = config_path[-1]
+            if final_key in ['default_records', 'date_range_days', 'batch_size']:
+                current[final_key] = int(cli_value)
+            else:
+                current[final_key] = cli_value
+            
+            overrides_applied += 1
+            logger.debug(f"{EMOJI['merge']} Applied CLI override: --{cli_arg}={cli_value}")
+    
+    logger.debug(f"{EMOJI['success']} Applied {overrides_applied} CLI argument overrides")
+    return result
+
+
 def apply_env_overrides(config: Dict[str, Any]) -> Dict[str, Any]:
     """Apply environment variable overrides to configuration."""
     logger.debug(f"{EMOJI['config']} Applying environment variable overrides")
@@ -211,7 +253,7 @@ def find_project_root() -> Path:
     raise FileNotFoundError("Could not find project root")
 
 
-def load_config(environment: Optional[str] = None) -> Config:
+def load_config(environment: Optional[str] = None, cli_overrides: Optional[Dict[str, Any]] = None) -> Config:
     """
     Load configuration with full precedence chain.
     
@@ -221,9 +263,11 @@ def load_config(environment: Optional[str] = None) -> Config:
     3. .env (team defaults)
     4. .env.local (personal overrides)
     5. Environment variables (runtime/deployment)
+    6. CLI arguments (highest priority)
     
     Args:
         environment: Environment name (dev, prod, etc.). If None, uses ENVIRONMENT env var or 'dev'
+        cli_overrides: Dictionary of CLI argument overrides
     
     Returns:
         Complete configuration object
@@ -256,8 +300,11 @@ def load_config(environment: Optional[str] = None) -> Config:
     else:
         logger.warning(f"{EMOJI['warning']} No environment-specific configuration found at: {get_relative_path(env_config_path, project_root)}")
     
-    # Apply environment variable overrides (highest priority)
+    # Apply environment variable overrides
     config_data = apply_env_overrides(config_data)
+    
+    # Apply CLI argument overrides (highest priority)
+    config_data = apply_cli_overrides(config_data, cli_overrides)
     
     # Create typed configuration objects
     logger.info(f"{EMOJI['success']} Configuration loaded successfully")
@@ -275,22 +322,23 @@ def load_config(environment: Optional[str] = None) -> Config:
 _config: Optional[Config] = None
 
 
-def get_config(environment: Optional[str] = None, reload: bool = False) -> Config:
+def get_config(environment: Optional[str] = None, reload: bool = False, cli_overrides: Optional[Dict[str, Any]] = None) -> Config:
     """
     Get configuration instance (singleton pattern).
     
     Args:
         environment: Environment name to load
         reload: Force reload of configuration
+        cli_overrides: Dictionary of CLI argument overrides
         
     Returns:
         Configuration object
     """
     global _config
     
-    if _config is None or reload:
+    if _config is None or reload or cli_overrides:
         logger.debug(f"{EMOJI['config']} {'Reloading' if reload else 'Loading'} configuration")
-        _config = load_config(environment)
+        _config = load_config(environment, cli_overrides)
     else:
         logger.debug(f"{EMOJI['info']} Using cached configuration")
     

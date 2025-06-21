@@ -31,6 +31,7 @@ commands:
   add_dependency: "uv add <package-name>"
   run_tests: "python -m pytest"
   run_demo_module: "python -m <demo_name>.main"
+  run_demo_with_overrides: "python -m <demo_name>.main --schema custom_schema --catalog custom_catalog --records 500"
   databricks_auth: "databricks auth login --host <workspace-url>"
 
 # Coding Conventions and Architecture
@@ -44,9 +45,25 @@ Always import these core modules without 'src' prefix:
 - `from core.data import Dataset, DataModel`
 - `from core.logging_config import setup_logging, get_logger`
 - `from core.workspace import get_workspace_schema_url`
+- `from core.cli import parse_demo_args, get_demo_args_with_config`
 
 ## Function Invocation Patterns
 Follow these prescriptive patterns for core functionality:
+
+### CLI Argument Parsing (REQUIRED for all new demos):
+```python
+from core.cli import parse_demo_args, get_demo_args_with_config
+
+# Standard usage - parse CLI arguments for demo
+cli_overrides = parse_demo_args("Sales Demo Pipeline")
+
+# Convenience function - parse CLI args and load config in one step
+cli_overrides, config = get_demo_args_with_config("Sales Demo Pipeline")
+
+# With custom arguments (for demo-specific parameters)
+custom_args = [("--batch-size", int, "Override batch size")]
+cli_overrides = parse_demo_args("Custom Demo Pipeline", custom_args)
+```
 
 ### Configuration Loading:
 ```python
@@ -218,6 +235,23 @@ setup_logging(
 logger = get_logger(__name__)  # Returns: Logger instance
 ```
 
+### CLI Functions
+```python
+from core.cli import parse_demo_args, get_demo_args_with_config
+
+# Parse CLI arguments for demo
+cli_overrides: Dict[str, Any] = parse_demo_args(
+    description: str = "Demo Pipeline",
+    custom_args: Optional[List[Tuple[str, type, str]]] = None
+)  # Returns: Dict of CLI arguments with None values filtered out
+
+# Parse CLI and load config in one step
+cli_overrides, config = get_demo_args_with_config(
+    description: str = "Demo Pipeline",
+    custom_args: Optional[List[Tuple[str, type, str]]] = None
+)  # Returns: Tuple of (cli_overrides_dict, config_object)
+```
+
 ### Workspace Functions
 ```python
 from core.workspace import get_workspace_schema_url
@@ -227,20 +261,32 @@ workspace_url: str = get_workspace_schema_url(config)  # Returns: Databricks wor
 # Data Pipeline Architecture
 
 ## Pipeline Orchestrator Pattern (main.py)
-Sequence: logging setup → data generation → batch pipeline → error handling
+Sequence: CLI parsing → logging setup → data generation → batch pipeline → error handling
 
 **ALWAYS start main.py with:**
 ```python
+from core.cli import parse_demo_args
 from core.logging_config import setup_logging, get_logger
 from core.workspace import get_workspace_schema_url
+from config import get_config
 
 def main():
+    # Parse command line arguments using centralized parsing (REQUIRED)
+    cli_overrides = parse_demo_args("Your Demo Pipeline Description")
+    
     # Setup centralized logging first
     setup_logging(level="INFO")
     logger = get_logger(__name__)
     
     try:
         logger.info("Starting pipeline...")
+        
+        if cli_overrides:
+            logger.info(f"CLI overrides provided: {cli_overrides}")
+        
+        # Load configuration with CLI overrides
+        config = get_config(cli_overrides=cli_overrides)
+        
         # Your pipeline logic here
         
         logger.info("Pipeline completed successfully")
@@ -383,9 +429,31 @@ Precedence (lowest to highest):
 3. `.env` - Team defaults (committed)
 4. `.env.local` - Personal overrides (gitignored)
 5. Environment variables - Runtime/deployment
+6. CLI arguments - Command line overrides (highest priority)
 
 ## Key Environment Variables
 Essential vars: ENVIRONMENT, DATABRICKS_CATALOG, DATABRICKS_SCHEMA, DATABRICKS_WORKSPACE_URL
+
+## CLI Configuration Overrides
+Support for runtime configuration overrides via command line arguments:
+- `--schema SCHEMA` - Override Databricks schema name
+- `--catalog CATALOG` - Override Databricks catalog name  
+- `--volume VOLUME` - Override Databricks volume name
+- `--records RECORDS` - Override number of records to generate
+
+Examples:
+```bash
+# Use custom schema
+python -m reference_demos.sales_demo --schema my_test_schema
+
+# Multiple overrides
+python -m reference_demos.sales_demo --schema test --catalog dev_catalog --records 500
+
+# Help for available options
+python -m reference_demos.sales_demo --help
+```
+
+CLI arguments take highest precedence, overriding all other configuration sources.
 
 ## Auto-Creation Behavior
 - Catalogs: Auto-creation disabled by default (requires explicit permission)
@@ -449,11 +517,14 @@ transaction_date = generic.datetime.datetime(
 ## When Creating New Demos
 1. If the user doesn't specify, ask for a dataset type such as the source of data to mimic or a use case that needs to be fulfilled.
 2. Clarify requirements before code generation
-3. **Use the core and config modules in src**. E.g. use logging_config.py for logging. Use spark.py for setting up spark sessions. Etc.
-4. Use mimesis for realistic synthetic data generation
-5. **Use DataModel/Dataset pattern** for multiple related datasets
-6. Execute new scripts as modules: `python -m customer_demos.<demo_name>.main`
-7. Test thoroughly with realistic data volumes
+3. **MANDATORY**: Use centralized CLI parsing with `from core.cli import parse_demo_args`
+4. **Use the core and config modules in src**. E.g. use logging_config.py for logging. Use spark.py for setting up spark sessions. Etc.
+5. Use mimesis for realistic synthetic data generation
+6. **Use DataModel/Dataset pattern** for multiple related datasets
+7. Execute new scripts as modules: `python -m customer_demos.<demo_name>.main`
+8. Test thoroughly with realistic data volumes
+
+**CLI Parsing Requirement**: ALL new demos MUST use `parse_demo_args()` from `core.cli` to ensure consistent CLI interface across all demos. This provides standard arguments (--schema, --catalog, --volume, --records, --format, --log-level) automatically.
 
 ## File Organization
 - New demos go in `src/customer_demos/<demo_name>/` directory

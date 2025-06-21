@@ -4,11 +4,13 @@ Main execution pipeline for the sales demo. This demo is a reference implementat
 
 Execution:
     python -m reference_demos.sales_demo.main
+    python -m reference_demos.sales_demo.main --schema my_custom_schema
 """
 
 import sys
 
 from config.settings import get_config
+from core.cli import parse_demo_args
 from core.spark import get_spark
 from core.catalog import ensure_catalog_schema_volume
 from core.io import save_datamodel_to_volume, batch_load_datamodel_from_volume
@@ -18,6 +20,9 @@ from core.workspace import get_workspace_schema_url
 from .datasets import data_model
 
 def main():
+    # Parse command line arguments using centralized parsing
+    cli_overrides = parse_demo_args("Sales Demo Pipeline")
+    
     # Setup centralized logging first
     setup_logging(level="INFO", include_timestamp=True, include_module=True)
     logger = get_logger(__name__)
@@ -25,8 +30,11 @@ def main():
     logger.info("Starting sales demo pipeline")
     
     try:
-        # Load configuration
-        config = get_config()
+        if cli_overrides:
+            logger.info(f"CLI overrides provided: {cli_overrides}")
+        
+        # Load configuration with CLI overrides
+        config = get_config(cli_overrides=cli_overrides)
         logger.info(f"Loaded configuration for environment: {config.app.name}")
         
         # Initialize Spark session
