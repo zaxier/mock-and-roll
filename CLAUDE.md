@@ -113,6 +113,117 @@ loaded_dfs = batch_load_datamodel_from_volume(
 )
 ```
 
+## Core Function Signatures and Return Types
+
+### Configuration Functions
+```python
+from config import get_config, Config
+config: Config = get_config()  # Returns: Config object with nested attributes
+```
+
+### Spark Functions
+```python
+from core.spark import get_spark
+spark: SparkSession = get_spark()  # Returns: SparkSession instance
+```
+
+### Catalog Functions
+```python
+from core.catalog import ensure_catalog_schema_volume
+ready: bool = ensure_catalog_schema_volume(...)  # Returns: bool (True if successful)
+```
+
+### Data Model Classes
+```python
+from core.data import Dataset, DataModel
+
+# Dataset class constructor
+dataset = Dataset(
+    name: str,                    # Required: dataset name
+    data: pd.DataFrame,           # Required: pandas DataFrame
+    file_format: str = "parquet", # Optional: file format (default: "parquet")
+    subdirectory: Optional[str] = None  # Optional: subdirectory path
+)
+
+# DataModel class constructor  
+data_model = DataModel(
+    datasets: List[Dataset],      # Required: list of Dataset instances
+    base_path: Optional[str] = None  # Optional: base path for datasets
+)
+
+# Dataset methods
+dataset.get_file_path(base_path: str) -> str  # Returns: complete file path
+
+# DataModel methods
+data_model.get_dataset(name: str) -> Optional[Dataset]  # Returns: Dataset or None
+```
+
+### I/O Functions
+```python
+from core.io import (
+    save_to_volume, 
+    save_datamodel_to_volume, 
+    batch_load_with_copy_into,
+    batch_load_datamodel_from_volume
+)
+
+# Single dataset save
+save_to_volume(
+    spark: SparkSession,
+    df: pd.DataFrame | DataFrame,  # Pandas or PySpark DataFrame
+    file_path: str,
+    file_format: str = "parquet"
+) -> None  # Returns: None
+
+# Multiple datasets save via DataModel
+save_datamodel_to_volume(
+    spark: SparkSession,
+    data_model: DataModel,
+    config: Config,
+    base_subdirectory: str = "raw"
+) -> List[str]  # Returns: List of saved file paths
+
+# Single table batch load
+batch_load_with_copy_into(
+    spark: SparkSession,
+    source_path: str,
+    target_table: str,
+    file_format: str = "PARQUET",
+    table_schema: StructType = None,
+    drop_table_if_exists: bool = False,
+    copy_options: dict = None
+) -> DataFrame  # Returns: PySpark DataFrame (SELECT * FROM target_table)
+
+# Multiple datasets batch load via DataModel
+batch_load_datamodel_from_volume(
+    spark: SparkSession,
+    data_model: DataModel,
+    config: Config,
+    source_subdirectory: str = "raw",
+    target_schema_suffix: str = "_bronze",
+    drop_tables_if_exist: bool = False
+) -> List[DataFrame]  # Returns: List of PySpark DataFrames
+```
+
+### Logging Functions
+```python
+from core.logging_config import setup_logging, get_logger
+
+setup_logging(
+    level: str = "INFO",
+    include_timestamp: bool = True,
+    include_module: bool = True
+) -> None  # Returns: None
+
+logger = get_logger(__name__)  # Returns: Logger instance
+```
+
+### Workspace Functions
+```python
+from core.workspace import get_workspace_schema_url
+workspace_url: str = get_workspace_schema_url(config)  # Returns: Databricks workspace URL string
+```
+
 # Data Pipeline Architecture
 
 ## Pipeline Orchestrator Pattern (main.py)
