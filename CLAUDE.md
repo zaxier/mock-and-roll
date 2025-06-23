@@ -20,12 +20,11 @@ environment:
   package_manager: "uv"
   virtual_env: ".venv"
   setup_commands:
-    - "uv sync"
-    - "uv pip install -e ."
-    - "Activate virtual environment before running"
+    - "source .venv/bin/activate"
 
 # Key Development Commands
 commands:
+  activate_venv: "source .venv/bin/activate"
   install_dependencies: "uv sync"
   install_editable: "uv pip install -e ."
   add_dependency: "uv add <package-name>"
