@@ -9,10 +9,11 @@ from pathlib import Path
 from dataclasses import dataclass
 from typing import Optional, Dict, Any
 from dotenv import load_dotenv
-from core.logging_config import get_logger
+# Import logging directly to avoid circular import with core module
+import logging
 
-# Configure logging
-logger = get_logger(__name__)
+# Configure logging - use standard logging since core.logging_config depends on config
+logger = logging.getLogger(__name__)
 
 
 

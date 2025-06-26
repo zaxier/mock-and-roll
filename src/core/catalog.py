@@ -225,5 +225,5 @@ def ensure_catalog_schema_volume(spark: SparkSession, catalog_name: str, schema_
             logger.info("To enable volume auto-creation, set auto_create_volume: true in your config")
             return False
     
-    logger.info(f"✅ All resources verified: {catalog_name}.{schema_name}.{volume_name}")
+    logger.info(f"All resources verified: {catalog_name}.{schema_name}.{volume_name}")
     return True

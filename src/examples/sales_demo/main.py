@@ -9,13 +9,8 @@ Execution:
 
 import sys
 
-from config.settings import get_config
-from core.cli import parse_demo_args
-from core.spark import get_spark
-from core.catalog import ensure_catalog_schema_volume
-from core.io import save_datamodel_to_volume, batch_load_datamodel_from_volume
-from core.logging_config import setup_logging, get_logger
-from core.workspace import get_workspace_schema_url
+from config import get_config
+from core import *
 
 from .datasets import generate_datamodel
 
@@ -89,7 +84,6 @@ def main():
             data_model=data_model,
             config=config,
             source_subdirectory="raw",
-            target_schema_suffix="_bronze",
             drop_tables_if_exist=True
         )
         
@@ -99,6 +93,7 @@ def main():
         logger.info("Creating business-ready aggregations (Silver layer)...")
         
         # Daily sales summary
+        product_sales_bronze = get_bronze_table_name("product_sales")
         spark.sql(f"""
             CREATE OR REPLACE TABLE {config.databricks.catalog}.{config.databricks.schema}.daily_sales_silver AS
             SELECT 
@@ -108,12 +103,13 @@ def main():
                 SUM(amount) as total_sales,
                 AVG(amount) as avg_transaction_value,
                 SUM(quantity) as units_sold
-            FROM {config.databricks.catalog}.{config.databricks.schema}.product_sales_bronze
+            FROM {config.databricks.catalog}.{config.databricks.schema}.{product_sales_bronze}
             GROUP BY DATE(sale_date)
             ORDER BY date DESC
         """)
         
         # Customer lifetime value
+        user_profiles_bronze = get_bronze_table_name("user_profiles")
         spark.sql(f"""
             CREATE OR REPLACE TABLE {config.databricks.catalog}.{config.databricks.schema}.customer_lifetime_value_silver AS
             SELECT 
@@ -127,8 +123,8 @@ def main():
                 COALESCE(AVG(s.amount), 0) as avg_order_value,
                 MAX(s.sale_date) as last_purchase_date,
                 DATEDIFF(CURRENT_DATE(), c.signup_date) as days_since_signup
-            FROM {config.databricks.catalog}.{config.databricks.schema}.user_profiles_bronze c
-            LEFT JOIN {config.databricks.catalog}.{config.databricks.schema}.product_sales_bronze s
+            FROM {config.databricks.catalog}.{config.databricks.schema}.{user_profiles_bronze} c
+            LEFT JOIN {config.databricks.catalog}.{config.databricks.schema}.{product_sales_bronze} s
                 ON c.user_id = s.user_id
             GROUP BY c.user_id, c.full_name, c.email, c.customer_type, c.signup_date
         """)
@@ -143,7 +139,7 @@ def main():
                 SUM(amount) as revenue,
                 AVG(unit_price) as avg_price,
                 COUNT(DISTINCT user_id) as unique_customers
-            FROM {config.databricks.catalog}.{config.databricks.schema}.product_sales_bronze
+            FROM {config.databricks.catalog}.{config.databricks.schema}.{product_sales_bronze}
             GROUP BY product
             ORDER BY revenue DESC
         """)
@@ -158,7 +154,7 @@ def main():
                     SUM(amount) as total_spent,
                     MAX(sale_date) as last_transaction_date,
                     DATEDIFF(CURRENT_DATE(), MAX(sale_date)) as days_since_last_purchase
-                FROM {config.databricks.catalog}.{config.databricks.schema}.product_sales_bronze
+                FROM {config.databricks.catalog}.{config.databricks.schema}.{product_sales_bronze}
                 GROUP BY user_id
             )
             SELECT 
@@ -179,7 +175,7 @@ def main():
                     WHEN m.days_since_last_purchase > 180 THEN 'Lost'
                     ELSE 'Never Purchased'
                 END as activity_segment
-            FROM {config.databricks.catalog}.{config.databricks.schema}.user_profiles_bronze c
+            FROM {config.databricks.catalog}.{config.databricks.schema}.{user_profiles_bronze} c
             LEFT JOIN customer_metrics m ON c.user_id = m.user_id
         """)
         
@@ -197,8 +193,8 @@ def main():
             workspace_url = get_workspace_schema_url(config)
             logger.info(f"\n🎯 Data available at: {workspace_url}")
             logger.info("\nKey tables to explore:")
-            logger.info("  - user_profiles_bronze: Customer dimension table")
-            logger.info("  - product_sales_bronze: Sales fact table")
+            logger.info(f"  - {user_profiles_bronze}: Customer dimension table")
+            logger.info(f"  - {product_sales_bronze}: Sales fact table")
             logger.info("  - daily_sales_silver: Daily sales summaries")
             logger.info("  - customer_lifetime_value_silver: Customer value analysis")
             logger.info("  - product_performance_silver: Product sales metrics")

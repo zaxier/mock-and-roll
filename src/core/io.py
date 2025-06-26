@@ -14,6 +14,18 @@ logger = get_logger(__name__)
 
 # TODO: Implement IO functions for the medallion architecture.
 
+def get_bronze_table_name(dataset_name: str) -> str:
+    """
+    Generate consistent bronze table name for a dataset.
+    
+    Args:
+        dataset_name: Name of the dataset
+        
+    Returns:
+        Bronze table name with _bronze suffix
+    """
+    return f"{dataset_name}_bronze"
+
 # Save pandas or spark dataframe to volume with specified file path and file type: parquet, csv, json, etc.
 def save_to_volume(spark: SparkSession, df: pd.DataFrame | DataFrame, file_path: str, file_format: str = "parquet"):
     """
@@ -258,18 +270,17 @@ def batch_load_datamodel_from_volume(
     data_model: DataModel,
     config: Config,
     source_subdirectory: str = "raw",
-    target_schema_suffix: str = "_bronze",
     drop_tables_if_exist: bool = False
 ) -> List[DataFrame]:
     """
     Batch load all datasets from volume to Delta tables using COPY INTO.
+    Creates bronze tables with consistent _bronze suffix.
     
     Args:
         spark: SparkSession instance  
         data_model: DataModel with dataset definitions
         config: Configuration object
         source_subdirectory: Source subdirectory in volume
-        target_schema_suffix: Suffix for target table names
         drop_tables_if_exist: Whether to drop existing tables
         
     Returns:
@@ -284,7 +295,8 @@ def batch_load_datamodel_from_volume(
         )
         
         # Target table name
-        target_table = f"{config.databricks.catalog}.{config.databricks.schema}.{dataset.name}{target_schema_suffix}"
+        bronze_table_name = get_bronze_table_name(dataset.name)
+        target_table = f"{config.databricks.catalog}.{config.databricks.schema}.{bronze_table_name}"
         
         logger.debug(f"Loading dataset '{dataset.name}' from {source_path} to {target_table}")
         
