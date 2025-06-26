@@ -17,7 +17,7 @@ from core.io import save_datamodel_to_volume, batch_load_datamodel_from_volume
 from core.logging_config import setup_logging, get_logger
 from core.workspace import get_workspace_schema_url
 
-from .datasets import generate_datasets
+from .datasets import generate_datamodel
 
 def main():
     # Parse command line arguments using centralized parsing
@@ -62,7 +62,7 @@ def main():
         # Generate synthetic datasets
         logger.info("Generating synthetic sales datasets...")
         num_records = cli_overrides.get('records') if cli_overrides else None
-        data_model = generate_datasets(config, num_records)
+        data_model = generate_datamodel(config, num_records)
         
         # Log dataset statistics
         logger.info(f"Generated {len(data_model.datasets)} datasets:")

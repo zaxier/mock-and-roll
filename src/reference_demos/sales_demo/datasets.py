@@ -64,7 +64,7 @@ def generate_sales_data(user_ids: List[str], num_records=500) -> pd.DataFrame:
     })
 
 
-def generate_datasets(config: Config, num_records: int = None) -> DataModel:
+def generate_datamodel(config: Config, num_records: int = None) -> DataModel:
     """
     Generate all datasets for the sales demo.
     
