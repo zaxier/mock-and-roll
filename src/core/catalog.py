@@ -98,11 +98,11 @@ def create_catalog(spark: SparkSession, catalog_name: str, comment: Optional[str
         
         logger.info(f"Creating catalog: {catalog_name}")
         spark.sql(create_sql)
-        logger.info(f"✅ Successfully created catalog '{catalog_name}'")
+        logger.info(f"Successfully created catalog '{catalog_name}'")
         return True
         
     except Exception as e:
-        logger.error(f"❌ Failed to create catalog '{catalog_name}': {e}")
+        logger.exception(f"Failed to create catalog '{catalog_name}': {e}")
         return False
 
 
@@ -129,11 +129,11 @@ def create_schema(spark: SparkSession, catalog_name: str, schema_name: str, comm
         
         logger.info(f"Creating schema: {catalog_name}.{schema_name}")
         spark.sql(create_sql)
-        logger.info(f"✅ Successfully created schema '{catalog_name}.{schema_name}'")
+        logger.info(f"Successfully created schema '{catalog_name}.{schema_name}'")
         return True
         
     except Exception as e:
-        logger.error(f"❌ Failed to create schema '{catalog_name}.{schema_name}': {e}")
+        logger.exception(f"Failed to create schema '{catalog_name}.{schema_name}': {e}")
         return False
 
 
@@ -162,11 +162,11 @@ def create_volume(spark: SparkSession, catalog_name: str, schema_name: str, volu
         
         logger.info(f"Creating volume: {catalog_name}.{schema_name}.{volume_name}")
         spark.sql(create_sql)
-        logger.info(f"✅ Successfully created volume '{catalog_name}.{schema_name}.{volume_name}'")
+        logger.info(f"Successfully created volume '{catalog_name}.{schema_name}.{volume_name}'")
         return True
         
     except Exception as e:
-        logger.error(f"❌ Failed to create volume '{catalog_name}.{schema_name}.{volume_name}': {e}")
+        logger.exception(f"Failed to create volume '{catalog_name}.{schema_name}.{volume_name}': {e}")
         return False
 
 
@@ -190,7 +190,7 @@ def ensure_catalog_schema_volume(spark: SparkSession, catalog_name: str, schema_
     """
     # Handle None values
     if not catalog_name or not schema_name or not volume_name:
-        logger.error("❌ Catalog, schema, and volume names cannot be None or empty")
+        logger.error("Catalog, schema, and volume names cannot be None or empty")
         return False
         
     logger.info(f"Ensuring catalog/schema/volume: {catalog_name}.{schema_name}.{volume_name}")
@@ -201,7 +201,7 @@ def ensure_catalog_schema_volume(spark: SparkSession, catalog_name: str, schema_
             if not create_catalog(spark, catalog_name, f"Auto-created catalog for demo purposes"):
                 return False
         else:
-            logger.error(f"❌ Either catalog '{catalog_name}' does not exist and auto-creation is disabled or we ran into Spark error such as NO_ACTIVE_SESSION ")
+            logger.error(f"Either catalog '{catalog_name}' does not exist and auto-creation is disabled or we ran into Spark error such as NO_ACTIVE_SESSION ")
             logger.info("To enable catalog auto-creation, set auto_create_catalog: true in your config")
             return False
     
@@ -211,7 +211,7 @@ def ensure_catalog_schema_volume(spark: SparkSession, catalog_name: str, schema_
             if not create_schema(spark, catalog_name, schema_name, f"Auto-created schema for demo purposes"):
                 return False
         else:
-            logger.error(f"❌ Schema '{catalog_name}.{schema_name}' does not exist and auto-creation is disabled")
+            logger.error(f"Schema '{catalog_name}.{schema_name}' does not exist and auto-creation is disabled")
             logger.info("To enable schema auto-creation, set auto_create_schema: true in your config")
             return False
     
@@ -221,7 +221,7 @@ def ensure_catalog_schema_volume(spark: SparkSession, catalog_name: str, schema_
             if not create_volume(spark, catalog_name, schema_name, volume_name, f"Auto-created volume for demo data"):
                 return False
         else:
-            logger.error(f"❌ Volume '{catalog_name}.{schema_name}.{volume_name}' does not exist and auto-creation is disabled")
+            logger.error(f"Volume '{catalog_name}.{schema_name}.{volume_name}' does not exist and auto-creation is disabled")
             logger.info("To enable volume auto-creation, set auto_create_volume: true in your config")
             return False
     

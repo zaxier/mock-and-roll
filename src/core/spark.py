@@ -15,12 +15,12 @@ def get_spark():
 
     try:
         from databricks.connect import DatabricksSession
-        logger.info("🚀 Attempting to create serverless Databricks session")
+        logger.info("Attempting to create serverless Databricks session")
         return DatabricksSession.builder.serverless().getOrCreate()
     except ImportError:
-        logger.warning("⚠️ Databricks Connect not available, trying local Spark session")
+        logger.warning("Databricks Connect not available, trying local Spark session")
         return SparkSession.builder.getOrCreate()
     except Exception as ex:
-        logger.warning(f"❌ Error creating serverless Databricks session: {str(ex)}")
-        logger.warning("🔄 Falling back to local Spark session")
+        logger.warning(f"Error creating serverless Databricks session: {str(ex)}")
+        logger.warning("Falling back to local Spark session")
         return SparkSession.builder.getOrCreate()

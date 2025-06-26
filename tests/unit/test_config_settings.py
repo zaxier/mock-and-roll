@@ -115,12 +115,10 @@ class TestStorageConfig:
         """Test basic initialization."""
         config = StorageConfig(
             default_format="parquet",
-            compression="snappy",
             write_mode="overwrite"
         )
         
         assert config.default_format == "parquet"
-        assert config.compression == "snappy"
         assert config.write_mode == "overwrite"
 
 
@@ -159,7 +157,7 @@ class TestConfig:
         """Test complete config initialization."""
         databricks = DatabricksConfig("dev", "schema", "volume")
         data_gen = DataGenerationConfig(1000, 365, 10000)
-        storage = StorageConfig("parquet", "snappy", "overwrite")
+        storage = StorageConfig("parquet", "overwrite")
         logging = LoggingConfig("INFO", "format")
         app = AppConfig("app", "1.0.0")
         
@@ -443,7 +441,7 @@ class TestLoadConfig:
         mock_config = {
             'databricks': {'catalog': 'dev', 'schema': 'test', 'volume': 'data', 'auto_create_catalog': False, 'auto_create_schema': True, 'auto_create_volume': True},
             'data_generation': {'default_records': 1000, 'date_range_days': 365, 'batch_size': 10000},
-            'storage': {'default_format': 'parquet', 'compression': 'snappy', 'write_mode': 'overwrite'},
+            'storage': {'default_format': 'parquet', 'write_mode': 'overwrite'},
             'logging': {'level': 'INFO', 'format': 'test-format'},
             'app': {'name': 'test-app', 'version': '1.0.0'}
         }
@@ -468,7 +466,7 @@ class TestLoadConfig:
         base_config = {
             'databricks': {'catalog': 'dev', 'schema': 'test', 'volume': 'data', 'auto_create_catalog': False, 'auto_create_schema': True, 'auto_create_volume': True},
             'data_generation': {'default_records': 1000, 'date_range_days': 365, 'batch_size': 10000},
-            'storage': {'default_format': 'parquet', 'compression': 'snappy', 'write_mode': 'overwrite'},
+            'storage': {'default_format': 'parquet', 'write_mode': 'overwrite'},
             'logging': {'level': 'INFO', 'format': 'test-format'},
             'app': {'name': 'test-app', 'version': '1.0.0'}
         }
@@ -504,7 +502,7 @@ class TestGetConfig:
                 environment='dev',
                 databricks=DatabricksConfig('dev', 'test', 'data'),
                 data_generation=DataGenerationConfig(1000, 365, 10000),
-                storage=StorageConfig('parquet', 'snappy', 'overwrite'),
+                storage=StorageConfig('parquet', 'overwrite'),
                 logging=LoggingConfig('INFO', 'format'),
                 app=AppConfig('app', '1.0.0')
             )
@@ -527,7 +525,7 @@ class TestGetConfig:
                 environment='dev',
                 databricks=DatabricksConfig('dev', 'test', 'data'),
                 data_generation=DataGenerationConfig(1000, 365, 10000),
-                storage=StorageConfig('parquet', 'snappy', 'overwrite'),
+                storage=StorageConfig('parquet', 'overwrite'),
                 logging=LoggingConfig('INFO', 'format'),
                 app=AppConfig('app', '1.0.0')
             )

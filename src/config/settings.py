@@ -14,19 +14,7 @@ from core.logging_config import get_logger
 # Configure logging
 logger = get_logger(__name__)
 
-# TODO: move to a separate file
-# Emoji constants for logging
-EMOJI = {
-    'success': '✅',
-    'error': '❌',
-    'warning': '⚠️',
-    'info': 'ℹ️',
-    'config': '⚙️',
-    'env': '🔧',
-    'file': '📄',
-    'merge': '🔄',
-    'search': '🔍'
-}
+
 
 
 @dataclass
@@ -59,7 +47,7 @@ class DataGenerationConfig:
 class StorageConfig:
     """Storage and file format configuration."""
     default_format: str
-    compression: str
+    
     write_mode: str
 
 
@@ -102,13 +90,13 @@ def load_yaml_config(config_path: Path, project_root: Optional[Path] = None) -> 
     relative_path = get_relative_path(config_path, project_root)
     """Load YAML configuration file."""
     if not config_path.exists():
-        logger.error(f"{EMOJI['error']} Configuration file not found: {relative_path}")
+        logger.error(f"Configuration file not found: {relative_path}")
         raise FileNotFoundError(f"Configuration file not found: {config_path}")
     
-    logger.debug(f"{EMOJI['file']} Loading configuration from: {relative_path}")
+    logger.debug(f"Loading configuration from: {relative_path}")
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
-    logger.debug(f"{EMOJI['success']} Successfully loaded configuration from {relative_path}")
+    logger.debug(f"Successfully loaded configuration from {relative_path}")
     return config
 
 
@@ -145,9 +133,9 @@ def load_dotenv_files(project_root: Path) -> None:
     for env_file in env_files:
         if env_file.exists():
             load_dotenv(env_file, override=True)
-            logger.debug(f"{EMOJI['env']} Loaded environment variables from: {get_relative_path(env_file, project_root)}")
+            logger.debug(f"Loaded environment variables from: {get_relative_path(env_file, project_root)}")
         else:
-            logger.debug(f"{EMOJI['info']} No environment file found at: {get_relative_path(env_file, project_root)}")
+            logger.debug(f"No environment file found at: {get_relative_path(env_file, project_root)}")
 
 
 def apply_cli_overrides(config: Dict[str, Any], cli_overrides: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -155,7 +143,7 @@ def apply_cli_overrides(config: Dict[str, Any], cli_overrides: Optional[Dict[str
     if not cli_overrides:
         return config
         
-    logger.debug(f"{EMOJI['config']} Applying CLI argument overrides")
+    logger.debug(f"Applying CLI argument overrides")
     
     # Define CLI argument mappings
     cli_mappings = {
@@ -186,15 +174,15 @@ def apply_cli_overrides(config: Dict[str, Any], cli_overrides: Optional[Dict[str
                 current[final_key] = cli_value
             
             overrides_applied += 1
-            logger.debug(f"{EMOJI['merge']} Applied CLI override: --{cli_arg}={cli_value}")
+            logger.debug(f"Applied CLI override: --{cli_arg}={cli_value}")
     
-    logger.debug(f"{EMOJI['success']} Applied {overrides_applied} CLI argument overrides")
+    logger.debug(f"Applied {overrides_applied} CLI argument overrides")
     return result
 
 
 def apply_env_overrides(config: Dict[str, Any]) -> Dict[str, Any]:
     """Apply environment variable overrides to configuration."""
-    logger.debug(f"{EMOJI['config']} Applying environment variable overrides")
+    logger.debug(f"Applying environment variable overrides")
     
     # Define environment variable mappings
     env_mappings = {
@@ -230,26 +218,26 @@ def apply_env_overrides(config: Dict[str, Any]) -> Dict[str, Any]:
                 current[final_key] = env_value
             
             overrides_applied += 1
-            logger.debug(f"{EMOJI['merge']} Applied override: {env_var}={env_value}")
+            logger.debug(f"Applied override: {env_var}={env_value}")
     
-    logger.debug(f"{EMOJI['success']} Applied {overrides_applied} environment variable overrides")
+    logger.debug(f"Applied {overrides_applied} environment variable overrides")
     return result
 
 
 def find_project_root() -> Path:
     """Find project root by looking for marker files."""
-    logger.debug(f"{EMOJI['search']} Searching for project root directory")
+    logger.debug(f"Searching for project root directory")
     current = Path.cwd()
     markers = ['pyproject.toml', 'databricks.yml', '.git']
     
     while current != current.parent:
         if any((current / marker).exists() for marker in markers):
             # Use absolute path here to avoid recursion
-            logger.debug(f"{EMOJI['success']} Found project root at: {current}")
+            logger.debug(f"Found project root at: {current}")
             return current
         current = current.parent
     
-    logger.error(f"{EMOJI['error']} Could not find project root directory")
+    logger.error(f"Could not find project root directory")
     raise FileNotFoundError("Could not find project root")
 
 
@@ -272,7 +260,7 @@ def load_config(environment: Optional[str] = None, cli_overrides: Optional[Dict[
     Returns:
         Complete configuration object
     """
-    logger.info(f"{EMOJI['config']} Starting configuration load process")
+    logger.info(f"Starting configuration load process")
     
     # Get project root directory
     project_root = find_project_root()
@@ -284,7 +272,7 @@ def load_config(environment: Optional[str] = None, cli_overrides: Optional[Dict[
     # Determine environment (may now be set by .env files)
     if environment is None:
         environment = os.getenv('ENVIRONMENT', 'dev')
-    logger.info(f"{EMOJI['info']} Using environment: {environment}")
+    logger.info(f"Using environment: {environment}")
     
     # Load base configuration
     base_config_path = config_dir / 'base.yml'
@@ -293,12 +281,12 @@ def load_config(environment: Optional[str] = None, cli_overrides: Optional[Dict[
     # Load environment-specific configuration if it exists
     env_config_path = config_dir / 'environments' / f'{environment}.yml'
     if env_config_path.exists():
-        logger.debug(f"{EMOJI['file']} Loading environment-specific configuration from: {get_relative_path(env_config_path, project_root)}")
+        logger.debug(f"Loading environment-specific configuration from: {get_relative_path(env_config_path, project_root)}")
         env_config = load_yaml_config(env_config_path, project_root)
         config_data = merge_configs(config_data, env_config)
-        logger.debug(f"{EMOJI['merge']} Merged environment configuration with base configuration")
+        logger.debug(f"Merged environment configuration with base configuration")
     else:
-        logger.warning(f"{EMOJI['warning']} No environment-specific configuration found at: {get_relative_path(env_config_path, project_root)}")
+        logger.warning(f"No environment-specific configuration found at: {get_relative_path(env_config_path, project_root)}")
     
     # Apply environment variable overrides
     config_data = apply_env_overrides(config_data)
@@ -307,7 +295,7 @@ def load_config(environment: Optional[str] = None, cli_overrides: Optional[Dict[
     config_data = apply_cli_overrides(config_data, cli_overrides)
     
     # Create typed configuration objects
-    logger.info(f"{EMOJI['success']} Configuration loaded successfully")
+    logger.info(f"Configuration loaded successfully")
     return Config(
         environment=environment,
         databricks=DatabricksConfig(**config_data['databricks']),
@@ -337,9 +325,9 @@ def get_config(environment: Optional[str] = None, reload: bool = False, cli_over
     global _config
     
     if _config is None or reload or cli_overrides:
-        logger.debug(f"{EMOJI['config']} {'Reloading' if reload else 'Loading'} configuration")
+        logger.debug(f"{'Reloading' if reload else 'Loading'} configuration")
         _config = load_config(environment, cli_overrides)
     else:
-        logger.debug(f"{EMOJI['info']} Using cached configuration")
+        logger.debug(f"Using cached configuration")
     
     return _config
