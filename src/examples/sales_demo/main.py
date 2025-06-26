@@ -3,8 +3,8 @@
 Main execution pipeline for the sales demo. This demo is a reference implementation of the sales demo.
 
 Execution:
-    python -m reference_demos.sales_demo.main
-    python -m reference_demos.sales_demo.main --schema my_custom_schema
+    python -m examples.sales_demo.main
+    python -m examples.sales_demo.main --schema my_custom_schema
 """
 
 import sys

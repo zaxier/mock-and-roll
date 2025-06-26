@@ -18,7 +18,7 @@ echo "DATABRICKS_CATALOG=demo_catalog" > .env.local
 echo "DATABRICKS_SCHEMA=synthetic_data" >> .env.local
 
 # 3. Generate your first AI-powered demo
-python -m reference_demos.sales_demo.main
+python -m examples.sales_demo.main
 ```
 
 ### Extend with Claude Code

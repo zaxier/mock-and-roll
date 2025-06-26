@@ -8,7 +8,7 @@ from unittest.mock import patch, Mock
 
 from core.catalog import ensure_catalog_schema_volume
 from core.io import batch_load_with_copy_into, save_datamodel_to_volume, batch_load_datamodel_from_volume
-from reference_demos.sales_demo.datasets import generate_user_profiles, generate_sales_data
+from examples.sales_demo.datasets import generate_user_profiles, generate_sales_data
 from config.settings import get_config
 
 

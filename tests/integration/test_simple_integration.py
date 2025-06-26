@@ -11,7 +11,7 @@ import pandas as pd
 
 from core.catalog import ensure_catalog_schema_volume
 from core.io import save_to_volume, batch_load_with_copy_into
-from reference_demos.sales_demo.datasets import generate_user_profiles, generate_sales_data
+from examples.sales_demo.datasets import generate_user_profiles, generate_sales_data
 from config.settings import get_config
 
 

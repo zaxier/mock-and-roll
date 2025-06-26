@@ -417,7 +417,7 @@ data_model = DataModel(
 ## Batch Ingestion
 - Use the batch copy into function in core.io for ingestion
 - Load from Volume → write to Delta table
-- Follow example in @src/reference_demos/sales_demo
+- Follow example in @src/examples/sales_demo
 
 # Configuration Management
 
@@ -443,13 +443,13 @@ Support for runtime configuration overrides via command line arguments:
 Examples:
 ```bash
 # Use custom schema
-python -m reference_demos.sales_demo --schema my_test_schema
+python -m examples.sales_demo --schema my_test_schema
 
 # Multiple overrides
-python -m reference_demos.sales_demo --schema test --catalog dev_catalog --records 500
+python -m examples.sales_demo --schema test --catalog dev_catalog --records 500
 
 # Help for available options
-python -m reference_demos.sales_demo --help
+python -m examples.sales_demo --help
 ```
 
 CLI arguments take highest precedence, overriding all other configuration sources.
@@ -520,14 +520,14 @@ transaction_date = generic.datetime.datetime(
 4. **Use the core and config modules in src**. E.g. use logging_config.py for logging. Use spark.py for setting up spark sessions. Etc.
 5. Use mimesis for realistic synthetic data generation
 6. **Use DataModel/Dataset pattern** for multiple related datasets
-7. Execute new scripts as modules: `python -m customer_demos.<demo_name>.main`
+7. Execute new scripts as modules: `python -m <demo_name>` (assuming __main__.py has been implemented) or `python -m <demo_name>.main`
 8. Test thoroughly with realistic data volumes
 
 **CLI Parsing Requirement**: ALL new demos MUST use `parse_demo_args()` from `core.cli` to ensure consistent CLI interface across all demos. This provides standard arguments (--schema, --catalog, --volume, --records, --format, --log-level) automatically.
 
 ## File Organization
-- New demos go in `src/customer_demos/<demo_name>/` directory
-- Follow existing implementation patterns of `src/reference_demos` for example `src/reference_demos/sales_demo` dir
+- New demos go in `src/<demo_name>/` directory
+- Follow existing implementation patterns of `src/examples` for example `src/examples/sales_demo` dir
 - **REQUIRED**: Each new demo directory must contain exactly these 4 files:
   1. `__init__.py` - Empty Python package file
   2. `__main__.py` - Entry point for running the demo as a module
