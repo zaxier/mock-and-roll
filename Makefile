@@ -18,7 +18,6 @@ help:
 	@echo "  make test-integration    - Run integration tests."
 	@echo "  make test-spark          - Run Spark-dependent tests."
 	@echo "  make test-databricks     - Run Databricks-dependent tests."
-	@echo "  make run-demo DEMO=<demo_path> [ARGS='--schema custom'] - Run a specific demo (e.g., make run-demo DEMO=examples.sales_demo.main)."
 	@echo "  make show-config         - Display the current configuration."
 	@echo "  make drop-schema         - Drop a Databricks schema."
 	@echo "  make sync-docs           - Synchronize documentation."
@@ -60,13 +59,6 @@ test-spark:
 test-databricks:
 	@echo "Running Databricks-dependent tests..."
 	$(PYTEST) -m databricks
-
-run-demo:
-ifndef DEMO
-	$(error DEMO is required. Usage: make run-demo DEMO=<demo_path> [ARGS='--schema custom'])
-endif
-	@echo "Running demo: $(DEMO) with args: $(ARGS)..."
-	$(PYTHON) -m $(DEMO) $(ARGS)
 
 show-config:
 	@echo "Displaying current configuration..."
