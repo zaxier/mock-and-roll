@@ -40,7 +40,7 @@ class DataGenerationConfig:
     """Data generation parameters."""
     default_records: int
     date_range_days: int
-    batch_size: int
+    batch_size: int # TODO: Unused, consider removing or implementing
 
 
 @dataclass
