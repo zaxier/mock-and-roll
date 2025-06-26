@@ -15,8 +15,6 @@ data_generation:
   batch_size: 10000
 
 storage:
-  default_format: "parquet"
-  
   write_mode: "overwrite"
 
 logging:

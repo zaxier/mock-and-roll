@@ -23,7 +23,6 @@ def save_to_volume(spark: SparkSession, df: pd.DataFrame | DataFrame, file_path:
         spark: SparkSession instance
         df: Pandas or PySpark DataFrame to save
         file_path: Target path to save the file
-        file_format: Format to save the file in (default: parquet)
     """
     # Convert pandas DataFrame to PySpark if needed
     if isinstance(df, pd.DataFrame):
@@ -44,7 +43,6 @@ def read_stream_with_autoloader(spark: SparkSession, source_path: str, schema, f
             spark: SparkSession instance
             source_path: Path to source data
             schema: Schema for the data
-            file_format: Format of source files (default: parquet)
             
         Returns:
             DataFrame with added metadata columns
@@ -88,7 +86,6 @@ def read_stream_with_dlt(source_path: str, file_format: str = "parquet", schema=
     
     Args:
         source_path: Path to source data (must start with 'dbfs:/')
-        file_format: Format of source files (default: parquet)
         schema: Optional schema for the data. If None, uses schema inference
         schema_location: Optional path for schema inference checkpoint
         
@@ -247,8 +244,7 @@ def save_datamodel_to_volume(
         save_to_volume(
             spark=spark,
             df=dataset.data,
-            file_path=volume_path,
-            file_format=dataset.file_format
+            file_path=volume_path
         )
         
         saved_paths.append(volume_path)
@@ -300,7 +296,6 @@ def batch_load_datamodel_from_volume(
             spark=spark,
             source_path=source_path,
             target_table=target_table,
-            file_format=dataset.file_format.upper(),
             table_schema=table_schema,
             drop_table_if_exists=drop_tables_if_exist
         )

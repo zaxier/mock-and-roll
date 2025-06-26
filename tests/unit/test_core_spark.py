@@ -3,6 +3,7 @@ from unittest.mock import Mock, patch
 import logging
 
 
+@pytest.mark.unit
 class TestGetSpark:
     """Test cases for the get_spark function."""
     
@@ -69,6 +70,7 @@ class TestGetSpark:
         mock_logger.warning.assert_any_call("Falling back to local Spark session")
 
 
+@pytest.mark.unit
 class TestLoggingConfiguration:
     """Test cases for logging configuration."""
     

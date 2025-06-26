@@ -290,13 +290,14 @@ def main():
     
     args = parser.parse_args()
     
-    # Setup logging
-    setup_logging(level="INFO", include_timestamp=True, include_module=True)
+    # Load configuration first
+    config = get_config()
+    
+    # Setup logging using configured level
+    setup_logging(level=config.logging.level, include_timestamp=True, include_module=True)
     logger = get_logger(__name__)
     
     try:
-        # Load configuration
-        config = get_config()
         
         # Create and run dropper
         dropper = SchemaDropper(config)

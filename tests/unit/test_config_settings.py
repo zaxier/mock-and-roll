@@ -25,6 +25,7 @@ from src.config.settings import (
 )
 
 
+@pytest.mark.unit
 class TestDatabricksConfig:
     """Test DatabricksConfig dataclass."""
     
@@ -92,6 +93,7 @@ class TestDatabricksConfig:
         assert config.auto_create_volume == False
 
 
+@pytest.mark.unit
 class TestDataGenerationConfig:
     """Test DataGenerationConfig dataclass."""
     
@@ -108,20 +110,20 @@ class TestDataGenerationConfig:
         assert config.batch_size == 10000
 
 
+@pytest.mark.unit
 class TestStorageConfig:
     """Test StorageConfig dataclass."""
     
     def test_initialization(self):
         """Test basic initialization."""
         config = StorageConfig(
-            default_format="parquet",
             write_mode="overwrite"
         )
         
-        assert config.default_format == "parquet"
         assert config.write_mode == "overwrite"
 
 
+@pytest.mark.unit
 class TestLoggingConfig:
     """Test LoggingConfig dataclass."""
     
@@ -136,6 +138,7 @@ class TestLoggingConfig:
         assert "%(asctime)s" in config.format
 
 
+@pytest.mark.unit
 class TestAppConfig:
     """Test AppConfig dataclass."""
     
@@ -150,6 +153,7 @@ class TestAppConfig:
         assert config.version == "1.0.0"
 
 
+@pytest.mark.unit
 class TestConfig:
     """Test main Config dataclass."""
     
@@ -157,7 +161,7 @@ class TestConfig:
         """Test complete config initialization."""
         databricks = DatabricksConfig("dev", "schema", "volume")
         data_gen = DataGenerationConfig(1000, 365, 10000)
-        storage = StorageConfig("parquet", "overwrite")
+        storage = StorageConfig("overwrite")
         logging = LoggingConfig("INFO", "format")
         app = AppConfig("app", "1.0.0")
         
@@ -178,6 +182,7 @@ class TestConfig:
         assert config.app == app
 
 
+@pytest.mark.unit
 class TestLoadYamlConfig:
     """Test YAML configuration loading."""
     
@@ -211,6 +216,7 @@ class TestLoadYamlConfig:
         assert "Configuration file not found" in str(exc_info.value)
 
 
+@pytest.mark.unit
 class TestMergeConfigs:
     """Test configuration merging functionality."""
     
@@ -271,6 +277,7 @@ class TestMergeConfigs:
         assert override == original_override
 
 
+@pytest.mark.unit
 class TestApplyEnvOverrides:
     """Test environment variable override functionality."""
     
@@ -375,6 +382,7 @@ class TestApplyEnvOverrides:
         assert result['databricks']['catalog'] == 'test'
 
 
+@pytest.mark.unit
 class TestLoadDotenvFiles:
     """Test .env file loading functionality."""
     
@@ -431,6 +439,7 @@ class TestLoadDotenvFiles:
         assert mock_load_dotenv.call_count == 0
 
 
+@pytest.mark.unit
 class TestLoadConfig:
     """Test full configuration loading."""
     
@@ -441,7 +450,7 @@ class TestLoadConfig:
         mock_config = {
             'databricks': {'catalog': 'dev', 'schema': 'test', 'volume': 'data', 'auto_create_catalog': False, 'auto_create_schema': True, 'auto_create_volume': True},
             'data_generation': {'default_records': 1000, 'date_range_days': 365, 'batch_size': 10000},
-            'storage': {'default_format': 'parquet', 'write_mode': 'overwrite'},
+            'storage': {'write_mode': 'overwrite'},
             'logging': {'level': 'INFO', 'format': 'test-format'},
             'app': {'name': 'test-app', 'version': '1.0.0'}
         }
@@ -466,7 +475,7 @@ class TestLoadConfig:
         base_config = {
             'databricks': {'catalog': 'dev', 'schema': 'test', 'volume': 'data', 'auto_create_catalog': False, 'auto_create_schema': True, 'auto_create_volume': True},
             'data_generation': {'default_records': 1000, 'date_range_days': 365, 'batch_size': 10000},
-            'storage': {'default_format': 'parquet', 'write_mode': 'overwrite'},
+            'storage': {'write_mode': 'overwrite'},
             'logging': {'level': 'INFO', 'format': 'test-format'},
             'app': {'name': 'test-app', 'version': '1.0.0'}
         }
@@ -488,6 +497,7 @@ class TestLoadConfig:
         assert config.databricks.auto_create_volume == True   # From base config
 
 
+@pytest.mark.unit
 class TestGetConfig:
     """Test get_config singleton functionality."""
     
@@ -502,7 +512,7 @@ class TestGetConfig:
                 environment='dev',
                 databricks=DatabricksConfig('dev', 'test', 'data'),
                 data_generation=DataGenerationConfig(1000, 365, 10000),
-                storage=StorageConfig('parquet', 'overwrite'),
+                storage=StorageConfig('overwrite'),
                 logging=LoggingConfig('INFO', 'format'),
                 app=AppConfig('app', '1.0.0')
             )
@@ -525,7 +535,7 @@ class TestGetConfig:
                 environment='dev',
                 databricks=DatabricksConfig('dev', 'test', 'data'),
                 data_generation=DataGenerationConfig(1000, 365, 10000),
-                storage=StorageConfig('parquet', 'overwrite'),
+                storage=StorageConfig('overwrite'),
                 logging=LoggingConfig('INFO', 'format'),
                 app=AppConfig('app', '1.0.0')
             )

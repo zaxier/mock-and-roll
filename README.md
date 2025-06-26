@@ -11,7 +11,7 @@ Transform client demonstrations with AI-generated synthetic data pipelines. Expe
 ```bash
 # 1. Installation
 git clone <repo-url> && cd custom-demo-accelerator
-uv sync && uv pip install -e .
+make install
 
 # 2. Configuration (minimal setup)
 echo "DATABRICKS_CATALOG=demo_catalog" > .env.local
@@ -106,6 +106,19 @@ save_datamodel_to_volume(spark, data_model, config)
 batch_load_datamodel_from_volume(spark, data_model, config)
 ```
 
+## Configuration
+
+This repository uses a layered configuration system. Settings are applied with the following precedence (where the last one wins):
+
+1. `config/base.yml` (Base defaults for the entire project)
+2. `config/environments/<ENV>.yml` (Environment-specific settings, e.g., `dev.yml`)
+3. `.env` (Team-level secrets and defaults, should be committed)
+4. `.env.local` (Your personal overrides, gitignored)
+5. **Environment Variables** (e.g., `export DATABRICKS_SCHEMA=my_schema`)
+6. **CLI Arguments** (e.g., `--schema my_schema`, highest priority)
+
+> **Note**: For most users, you shouldn't need to modify the `config/*.yml` files. The framework is designed to work out-of-the-box with sensible defaults. Use `.env.local` for personal overrides and CLI arguments for runtime customization.
+
 ### Multi-Layer Configuration System
 **Precedence (Lowest → Highest):**
 1. `config/base.yml` - Base defaults
@@ -113,6 +126,7 @@ batch_load_datamodel_from_volume(spark, data_model, config)
 3. `.env` - Team defaults (committed)
 4. `.env.local` - Personal overrides (gitignored)
 5. Environment variables - Runtime/deployment
+6. CLI arguments - Command line overrides
 
 ## 🏗️ Architecture Overview
 
@@ -157,17 +171,22 @@ src/
 ## ⚡ Development Commands
 
 ```bash
-# Install in editable mode (recommended)
-uv pip install -e .
+# Install dependencies and project
+make install
 
-# Run tests
-python -m pytest
+# Run all tests
+make test
 
-# Run specific demo
-python -m netsuite_hft_demo.main
+# Run specific test suites
+make test-unit           # Unit tests only
+make test-integration    # Integration tests
+make test-spark          # Spark-dependent tests
+make test-databricks     # Databricks-dependent tests
 
-# Add new dependency
-uv add <package-name>
+# Utility commands
+make show-config         # Display current configuration
+make drop-schema         # Drop Databricks schema
+make clean              # Clean build artifacts and caches
 ```
 
 ## 🔗 Databricks Integration
@@ -176,26 +195,59 @@ uv add <package-name>
 ```bash
 databricks auth login --host <workspace-url>
 ```
-
-## 🌐 The Bigger Picture
-
-### What This Means for Data Engineering
-This isn't just about building pipelines—it's about demonstrating a new paradigm where:
-- **Humans become architects** powered by AI coding agents
-- **Prompt engineering becomes strategic** rather than tactical
-- **Exponential growth becomes achievable** through AI amplification
-- **Software engineering transcends implementation** to focus on design and creativity
-
-### Repository as Teaching Tool
-This codebase demonstrates AI-native development principles:
-- Configuration transparency
-- Prompt-driven development
-- Agent-optimized patterns
-- Exponential scaling foundations
+Choose a name for your profile (you'll need it again below)
 
 ## 📚 Getting Started
 
-See `CLAUDE.md` for detailed development guidance, architectural decisions, and AI-native development patterns.
+### Prerequisites
+- Python 3.12+
+- `uv` package manager installed
+- Databricks workspace access (for full functionality)
+
+### Step-by-Step Setup
+
+1. **Clone and Install**
+   ```bash
+   git clone <repo-url>
+   cd custom-demo-accelerator
+   make install
+   ```
+
+2. **Configure Environment**
+   Create your personal configuration file:
+   ```bash
+   # Minimal required configuration
+   echo "DATABRICKS_CATALOG=your_catalog" > .env.local  # Must exist, will not be automatically created
+   echo "DATABRICKS_SCHEMA=your_schema" >> .env.local  # Doesn't necessarily have to exist, will be created if allowed
+   echo "DATABRICKS_CONFIG_PROFILE=your_auth_profile >> .env.local
+   ```
+
+3. **Authenticate with Databricks** (if using Databricks features)
+   ```bash
+   databricks auth login --host https://your-workspace.cloud.databricks.com
+   ```
+
+4. **Verify Installation**
+   ```bash
+   make show-config  # Display current configuration
+   make test-unit    # Run unit tests
+   ```
+
+5. **Run Your First Demo**
+   ```bash
+   uv run python -m examples.sales_demo
+   
+   # Or with custom arguments
+   uv run python -m examples.sales_demo --schema custom_schema --records 1000
+   ```
+
+### Available Commands
+Run `make help` to see all available commands, or refer to the [Development Commands](#-development-commands) section above.
+
+### Troubleshooting
+- **Virtual environment issues**: Run `make clean` then `make install`
+- **Configuration problems**: Use `make show-config` to verify settings
+- **Test failures**: Run specific test suites to isolate issues (`make test-unit`, `make test-spark`, etc.)
 
 ## 🔧 Dependencies
 

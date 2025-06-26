@@ -1,1 +1,0 @@
-# Sporting Goods Retailer Demo Package

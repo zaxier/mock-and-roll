@@ -7,7 +7,6 @@ class Dataset(BaseModel):
     
     name: str
     data: pd.DataFrame
-    file_format: str = "parquet"
     subdirectory: Optional[str] = None
     
     def get_file_path(self, base_path: str) -> str:

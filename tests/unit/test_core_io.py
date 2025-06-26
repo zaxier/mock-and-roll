@@ -7,6 +7,7 @@ from src.core.io import save_to_volume, read_stream_with_autoloader, batch_load_
 # from core.io import save_to_volume, read_stream_with_autoloader
 
 
+@pytest.mark.unit
 class TestSaveToVolume:
     """Test cases for the save_to_volume function."""
     
@@ -91,6 +92,7 @@ class TestSaveToVolume:
             save_to_volume(mock_spark, pandas_df, file_path)
 
 
+@pytest.mark.unit
 class TestReadStreamWithAutoloader:
     """Test cases for the read_stream_with_autoloader function."""
     
@@ -269,6 +271,7 @@ class TestReadStreamWithAutoloader:
         assert result == mock_df_with_file
 
 
+@pytest.mark.unit
 class TestIntegrationScenarios:
     """Integration test scenarios for the IO module."""
     
@@ -353,6 +356,7 @@ class TestIntegrationScenarios:
         assert result == mock_df_with_file
 
 
+@pytest.mark.unit
 class TestBatchLoadWithCopyInto:
     """Test cases for the batch_load_with_copy_into function."""
     
@@ -642,6 +646,7 @@ class TestBatchLoadWithCopyInto:
         assert result == mock_result_df
 
 
+@pytest.mark.unit
 class TestBatchLoadIntegrationScenarios:
     """Integration test scenarios for batch_load_with_copy_into function."""
     

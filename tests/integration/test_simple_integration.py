@@ -82,6 +82,7 @@ class TestModuleIntegration:
 
 
 @pytest.mark.integration
+@pytest.mark.databricks
 class TestDataFlowIntegration:
     """Integration tests for data flow between components."""
     
@@ -177,6 +178,7 @@ class TestDataFlowIntegration:
 
 
 @pytest.mark.integration
+@pytest.mark.databricks
 class TestErrorHandlingIntegration:
     """Integration tests for error handling across modules."""
     
@@ -238,7 +240,8 @@ class TestErrorHandlingIntegration:
             assert sale_date_range.days >= 0  # Should have some range
 
 
-@pytest.mark.integration  
+@pytest.mark.integration
+@pytest.mark.databricks
 class TestPerformanceIntegration:
     """Integration tests for performance characteristics."""
     

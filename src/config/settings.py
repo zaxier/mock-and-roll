@@ -40,14 +40,12 @@ class DataGenerationConfig:
     """Data generation parameters."""
     default_records: int
     date_range_days: int
-    batch_size: int # TODO: Unused, consider removing or implementing
+    batch_size: int
 
 
 @dataclass
 class StorageConfig:
-    """Storage and file format configuration."""
-    default_format: str
-    
+    """Storage configuration."""
     write_mode: str
 
 
@@ -151,7 +149,6 @@ def apply_cli_overrides(config: Dict[str, Any], cli_overrides: Optional[Dict[str
         'schema': ['databricks', 'schema'],
         'volume': ['databricks', 'volume'],
         'records': ['data_generation', 'default_records'],
-        'format': ['storage', 'default_format'],
         'log_level': ['logging', 'level'],
     }
     
@@ -193,7 +190,6 @@ def apply_env_overrides(config: Dict[str, Any]) -> Dict[str, Any]:
         'DATABRICKS_AUTO_CREATE_SCHEMA': ['databricks', 'auto_create_schema'],
         'DATABRICKS_AUTO_CREATE_VOLUME': ['databricks', 'auto_create_volume'],
         'DATA_RECORDS': ['data_generation', 'default_records'],
-        'STORAGE_FORMAT': ['storage', 'default_format'],
         'LOG_LEVEL': ['logging', 'level'],
     }
     

@@ -23,8 +23,11 @@ def main():
     # Parse command line arguments using centralized parsing
     cli_overrides = parse_demo_args("Sales Demo Pipeline")
     
-    # Setup centralized logging first
-    setup_logging(level="INFO", include_timestamp=True, include_module=True)
+    # Load configuration with CLI overrides
+    config = get_config(cli_overrides=cli_overrides)
+    
+    # Setup centralized logging using configured level
+    setup_logging(level=config.logging.level, include_timestamp=True, include_module=True)
     logger = get_logger(__name__)
     
     try:
@@ -33,9 +36,6 @@ def main():
         
         if cli_overrides:
             logger.info(f"CLI overrides provided: {cli_overrides}")
-        
-        # Load configuration with CLI overrides
-        config = get_config(cli_overrides=cli_overrides)
         logger.info(f"Loaded configuration for environment: {config.app.name}")
         
         # Initialize Spark session

@@ -82,8 +82,7 @@ def generate_datamodel(config: Config, num_records: int = None) -> DataModel:
     users_data = generate_user_profiles(num_users)
     users_dataset = Dataset(
         name="user_profiles",
-        data=users_data,
-        file_format="parquet"
+        data=users_data
     )
     
     # Generate sales data using actual user IDs from the users dataset
@@ -93,8 +92,7 @@ def generate_datamodel(config: Config, num_records: int = None) -> DataModel:
     )
     sales_dataset = Dataset(
         name="product_sales",
-        data=sales_data,
-        file_format="parquet"
+        data=sales_data
     )
     
     # Organize into DataModel

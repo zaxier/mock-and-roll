@@ -67,12 +67,6 @@ def parse_demo_args(
         help="Override the number of records to generate"
     )
     parser.add_argument(
-        "--format",
-        type=str,
-        choices=["parquet", "delta", "csv", "json"],
-        help="Override the default storage format"
-    )
-    parser.add_argument(
         "--log-level",
         type=str,
         choices=["DEBUG", "INFO", "WARNING", "ERROR"],
