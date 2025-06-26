@@ -17,7 +17,7 @@ from core.io import save_datamodel_to_volume, batch_load_datamodel_from_volume
 from core.logging_config import setup_logging, get_logger
 from core.workspace import get_workspace_schema_url
 
-from .datasets import data_model
+from .datasets import generate_datasets
 
 def main():
     # Parse command line arguments using centralized parsing
@@ -27,9 +27,10 @@ def main():
     setup_logging(level="INFO", include_timestamp=True, include_module=True)
     logger = get_logger(__name__)
     
-    logger.info("Starting sales demo pipeline")
-    
     try:
+        logger.info("Starting sales demo pipeline...")
+        logger.info("This demo creates user profiles and sales transactions with proper relationships")
+        
         if cli_overrides:
             logger.info(f"CLI overrides provided: {cli_overrides}")
         
@@ -58,6 +59,16 @@ def main():
         
         logger.info("Catalog, schema, and volume are ready")
         
+        # Generate synthetic datasets
+        logger.info("Generating synthetic sales datasets...")
+        num_records = cli_overrides.get('records') if cli_overrides else None
+        data_model = generate_datasets(config, num_records)
+        
+        # Log dataset statistics
+        logger.info(f"Generated {len(data_model.datasets)} datasets:")
+        for dataset in data_model.datasets:
+            logger.info(f"  - {dataset.name}: {len(dataset.data):,} records")
+        
         # Save datasets to volume (Bronze layer)
         logger.info("Saving datasets to volume...")
         saved_paths = save_datamodel_to_volume(
@@ -84,24 +95,120 @@ def main():
         
         logger.info(f"Loaded {len(loaded_dfs)} datasets to Delta tables")
         
-        # Display sample data
-        for i, df in enumerate(loaded_dfs):
-            dataset_name = data_model.datasets[i].name
-            logger.info(f"Sample data from {dataset_name}:")
-            df.show(5, truncate=False)
-            logger.info(f"Total records in {dataset_name}: {df.count()}")
+        # Create Silver layer aggregations
+        logger.info("Creating business-ready aggregations (Silver layer)...")
         
-        logger.info("Sales demo pipeline completed successfully")
+        # Daily sales summary
+        spark.sql(f"""
+            CREATE OR REPLACE TABLE {config.databricks.catalog}.{config.databricks.schema}.daily_sales_silver AS
+            SELECT 
+                DATE(sale_date) as date,
+                COUNT(DISTINCT transaction_id) as num_transactions,
+                COUNT(DISTINCT user_id) as unique_customers,
+                SUM(amount) as total_sales,
+                AVG(amount) as avg_transaction_value,
+                SUM(quantity) as units_sold
+            FROM {config.databricks.catalog}.{config.databricks.schema}.product_sales_bronze
+            GROUP BY DATE(sale_date)
+            ORDER BY date DESC
+        """)
         
-        # Generate and display workspace URL
+        # Customer lifetime value
+        spark.sql(f"""
+            CREATE OR REPLACE TABLE {config.databricks.catalog}.{config.databricks.schema}.customer_lifetime_value_silver AS
+            SELECT 
+                c.user_id,
+                c.full_name,
+                c.email,
+                c.customer_type,
+                c.signup_date,
+                COUNT(DISTINCT s.transaction_id) as total_transactions,
+                COALESCE(SUM(s.amount), 0) as lifetime_value,
+                COALESCE(AVG(s.amount), 0) as avg_order_value,
+                MAX(s.sale_date) as last_purchase_date,
+                DATEDIFF(CURRENT_DATE(), c.signup_date) as days_since_signup
+            FROM {config.databricks.catalog}.{config.databricks.schema}.user_profiles_bronze c
+            LEFT JOIN {config.databricks.catalog}.{config.databricks.schema}.product_sales_bronze s
+                ON c.user_id = s.user_id
+            GROUP BY c.user_id, c.full_name, c.email, c.customer_type, c.signup_date
+        """)
+        
+        # Product performance
+        spark.sql(f"""
+            CREATE OR REPLACE TABLE {config.databricks.catalog}.{config.databricks.schema}.product_performance_silver AS
+            SELECT 
+                product,
+                COUNT(DISTINCT transaction_id) as num_transactions,
+                SUM(quantity) as units_sold,
+                SUM(amount) as revenue,
+                AVG(unit_price) as avg_price,
+                COUNT(DISTINCT user_id) as unique_customers
+            FROM {config.databricks.catalog}.{config.databricks.schema}.product_sales_bronze
+            GROUP BY product
+            ORDER BY revenue DESC
+        """)
+        
+        # Customer segments
+        spark.sql(f"""
+            CREATE OR REPLACE TABLE {config.databricks.catalog}.{config.databricks.schema}.customer_segments_silver AS
+            WITH customer_metrics AS (
+                SELECT 
+                    user_id,
+                    COUNT(DISTINCT transaction_id) as transaction_count,
+                    SUM(amount) as total_spent,
+                    MAX(sale_date) as last_transaction_date,
+                    DATEDIFF(CURRENT_DATE(), MAX(sale_date)) as days_since_last_purchase
+                FROM {config.databricks.catalog}.{config.databricks.schema}.product_sales_bronze
+                GROUP BY user_id
+            )
+            SELECT 
+                c.user_id,
+                c.customer_type,
+                COALESCE(m.transaction_count, 0) as transaction_count,
+                COALESCE(m.total_spent, 0) as total_spent,
+                CASE 
+                    WHEN m.total_spent > 5000 THEN 'High Value'
+                    WHEN m.total_spent > 1000 THEN 'Medium Value'
+                    WHEN m.total_spent > 0 THEN 'Low Value'
+                    ELSE 'No Purchases'
+                END as value_segment,
+                CASE
+                    WHEN m.days_since_last_purchase <= 30 THEN 'Active'
+                    WHEN m.days_since_last_purchase <= 90 THEN 'At Risk'
+                    WHEN m.days_since_last_purchase <= 180 THEN 'Dormant'
+                    WHEN m.days_since_last_purchase > 180 THEN 'Lost'
+                    ELSE 'Never Purchased'
+                END as activity_segment
+            FROM {config.databricks.catalog}.{config.databricks.schema}.user_profiles_bronze c
+            LEFT JOIN customer_metrics m ON c.user_id = m.user_id
+        """)
+        
+        logger.info("Silver layer tables created successfully")
+        
+        # Log summary statistics
+        logger.info("\n=== Pipeline Summary ===")
+        logger.info(f"Total Users: {len(data_model.get_dataset('user_profiles').data):,}")
+        logger.info(f"Total Transactions: {len(data_model.get_dataset('product_sales').data):,}")
+        
+        logger.info("\nSales demo pipeline completed successfully!")
+        
+        # Generate and display workspace URL for easy access
         try:
             workspace_url = get_workspace_schema_url(config)
-            logger.info(f"Data available at: {workspace_url}")
+            logger.info(f"\n🎯 Data available at: {workspace_url}")
+            logger.info("\nKey tables to explore:")
+            logger.info("  - user_profiles_bronze: Customer dimension table")
+            logger.info("  - product_sales_bronze: Sales fact table")
+            logger.info("  - daily_sales_silver: Daily sales summaries")
+            logger.info("  - customer_lifetime_value_silver: Customer value analysis")
+            logger.info("  - product_performance_silver: Product sales metrics")
+            logger.info("  - customer_segments_silver: Customer segmentation")
         except Exception as url_error:
             logger.warning(f"Could not generate workspace URL: {str(url_error)}")
         
     except Exception as e:
-        logger.error(f"Sales demo failed: {str(e)}")
+        logger.error(f"Pipeline failed: {str(e)}")
+        logger.exception("Full error details:")
         sys.exit(1)
 
 if __name__ == "__main__":
