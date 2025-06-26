@@ -44,7 +44,7 @@ def generate_user_profiles(num_records=100) -> pd.DataFrame:
     })
 
 
-def generate_sales_data(user_ids: List[str], num_records=50) -> pd.DataFrame:
+def generate_sales_data(user_ids: List[str], num_records=500) -> pd.DataFrame:
     """Generate product sales dataset with user_id as foreign key"""
     finance = Finance()
     dt = Datetime()
@@ -75,8 +75,8 @@ def generate_datasets(config: Config, num_records: int = None) -> DataModel:
     base_records = num_records or config.data_generation.default_records
     
     # Scale datasets appropriately
-    num_users = base_records
-    num_sales = base_records * 5  # Average 5 transactions per user
+    num_sales = base_records
+    num_users = base_records // 5 # Average 5 users per transaction
     
     # Generate users first to get their IDs
     users_data = generate_user_profiles(num_users)
