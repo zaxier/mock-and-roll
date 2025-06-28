@@ -8,12 +8,13 @@ from unittest.mock import patch, Mock
 
 from core.catalog import ensure_catalog_schema_volume
 from core.io import batch_load_with_copy_into, save_datamodel_to_volume, batch_load_datamodel_from_volume
-from reference_demos.sales_demo.datasets import generate_user_profiles, generate_sales_data
+from examples.sales_demo.datasets import generate_user_profiles, generate_sales_data
 from config.settings import get_config
 
 
 @pytest.mark.integration
 @pytest.mark.spark
+@pytest.mark.databricks
 class TestEndToEndDataPipeline:
     """End-to-end integration tests for complete data pipelines."""
     
@@ -56,8 +57,8 @@ class TestEndToEndDataPipeline:
         assert set(sales_spark_df.columns) == set(sales_data.columns)
         
         # Test that write operations can be created (without actual file save)
-        user_writer = user_spark_df.write.mode("overwrite").format(test_config.storage.default_format)
-        sales_writer = sales_spark_df.write.mode("overwrite").format(test_config.storage.default_format)
+        user_writer = user_spark_df.write.mode("overwrite").format("parquet")
+        sales_writer = sales_spark_df.write.mode("overwrite").format("parquet")
         assert user_writer is not None
         assert sales_writer is not None
         
@@ -228,7 +229,8 @@ class TestEndToEndDataPipeline:
 
 
 @pytest.mark.integration
-@pytest.mark.spark  
+@pytest.mark.spark
+@pytest.mark.databricks
 class TestEndToEndConfigurationIntegration:
     """Integration tests for configuration management across modules."""
     
@@ -253,8 +255,8 @@ class TestEndToEndConfigurationIntegration:
         assert sales_spark_df.count() == 50
         
         # Test that write operations use config format
-        user_writer = user_spark_df.write.mode("overwrite").format(config.storage.default_format)
-        sales_writer = sales_spark_df.write.mode("overwrite").format(config.storage.default_format)
+        user_writer = user_spark_df.write.mode("overwrite").format("parquet")
+        sales_writer = sales_spark_df.write.mode("overwrite").format("parquet")
         assert user_writer is not None
         assert sales_writer is not None
         
@@ -280,7 +282,7 @@ class TestEndToEndConfigurationIntegration:
                 mock_config.databricks.schema = env_config["schema"]
                 mock_config.databricks.volume = "test_volume"
                 mock_config.data_generation.default_records = env_config["records"]
-                mock_config.storage.default_format = "parquet"
+                # All data is now hardcoded to parquet format
                 
                 mock_get_config.return_value = mock_config
                 
@@ -311,6 +313,7 @@ class TestEndToEndConfigurationIntegration:
 
 @pytest.mark.integration
 @pytest.mark.spark
+@pytest.mark.databricks
 class TestEndToEndPerformanceIntegration:
     """Performance integration tests for complete workflows."""
     
@@ -414,6 +417,7 @@ class TestEndToEndPerformanceIntegration:
 
 @pytest.mark.integration
 @pytest.mark.spark
+@pytest.mark.databricks
 class TestEndToEndRobustnessIntegration:
     """Robustness integration tests for edge cases and error conditions."""
     

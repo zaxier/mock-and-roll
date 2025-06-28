@@ -12,8 +12,7 @@ from pyspark.sql.types import StructType, StructField, StringType, IntegerType, 
 import pandas as pd
 from datetime import datetime, timedelta
 
-from config import get_config, Config
-from core.spark import get_spark
+from config import get_config
 
 
 @pytest.fixture(scope="session")
@@ -90,7 +89,6 @@ def test_config():
     
     # Mock storage section
     test_config.storage = Mock()
-    test_config.storage.default_format = "parquet"
     
     # Mock data_generation section
     test_config.data_generation = Mock()

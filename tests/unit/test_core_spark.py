@@ -3,6 +3,7 @@ from unittest.mock import Mock, patch
 import logging
 
 
+@pytest.mark.unit
 class TestGetSpark:
     """Test cases for the get_spark function."""
     
@@ -48,7 +49,7 @@ class TestGetSpark:
         from src.core.spark import get_spark
         get_spark()
         
-        mock_logger.info.assert_called_with("🚀 Attempting to create serverless Databricks session")
+        mock_logger.info.assert_called_with("Attempting to create serverless Databricks session")
     
     @patch('src.core.spark.SparkSession')
     @patch('src.core.spark.logger')
@@ -64,11 +65,12 @@ class TestGetSpark:
         from src.core.spark import get_spark
         get_spark()
         
-        mock_logger.info.assert_called_with("🚀 Attempting to create serverless Databricks session")
-        mock_logger.warning.assert_any_call(f"❌ Error creating serverless Databricks session: {exception_msg}")
-        mock_logger.warning.assert_any_call("🔄 Falling back to local Spark session")
+        mock_logger.info.assert_called_with("Attempting to create serverless Databricks session")
+        mock_logger.warning.assert_any_call(f"Error creating serverless Databricks session: {exception_msg}")
+        mock_logger.warning.assert_any_call("Falling back to local Spark session")
 
 
+@pytest.mark.unit
 class TestLoggingConfiguration:
     """Test cases for logging configuration."""
     

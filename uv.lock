@@ -73,35 +73,8 @@ wheels = [
 ]
 
 [[package]]
-name = "custom-demo-accelerator"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "databricks-connect" },
-    { name = "databricks-dlt" },
-    { name = "mimesis" },
-    { name = "pandas" },
-    { name = "pydantic" },
-    { name = "pytest" },
-    { name = "python-dotenv" },
-    { name = "pyyaml" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "databricks-connect", specifier = "==16.3.0" },
-    { name = "databricks-dlt", specifier = ">=0.3.0" },
-    { name = "mimesis", specifier = ">=18.0.0" },
-    { name = "pandas", specifier = ">=2.2.3" },
-    { name = "pydantic", specifier = ">=2.11.7" },
-    { name = "pytest", specifier = ">=8.4.0" },
-    { name = "python-dotenv", specifier = ">=1.0.0" },
-    { name = "pyyaml", specifier = ">=6.0.2" },
-]
-
-[[package]]
 name = "databricks-connect"
-version = "16.3.0"
+version = "16.4.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "databricks-sdk" },
@@ -117,7 +90,7 @@ dependencies = [
     { name = "six" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f8/a2/d0ad15d52815ca3680bfa87be5a16fdaf11913b8ffb11a3378a5c3410a09/databricks_connect-16.3.0-py2.py3-none-any.whl", hash = "sha256:00af43ceee2dbbf26458a68bef5eeee0e53f31ed311875c2f581e6d0488b9f48", size = 2424471 },
+    { url = "https://files.pythonhosted.org/packages/dd/38/a1480cc917726ffa2c4bf16965af7f9bc6e2772629dd24d5d8927524522d/databricks_connect-16.4.1-py2.py3-none-any.whl", hash = "sha256:1349503588090deb708ef6a7eda0c218d91b67677e71987cc478337d08218a18", size = 2446223 },
 ]
 
 [[package]]
@@ -241,6 +214,33 @@ wheels = [
 ]
 
 [[package]]
+name = "mock-and-roll"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "databricks-connect" },
+    { name = "databricks-dlt" },
+    { name = "mimesis" },
+    { name = "pandas" },
+    { name = "pydantic" },
+    { name = "pytest" },
+    { name = "python-dotenv" },
+    { name = "pyyaml" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "databricks-connect", specifier = "==16.4.1" },
+    { name = "databricks-dlt", specifier = ">=0.3.0" },
+    { name = "mimesis", specifier = ">=18.0.0" },
+    { name = "pandas", specifier = ">=2.2.3" },
+    { name = "pydantic", specifier = ">=2.11.7" },
+    { name = "pytest", specifier = ">=8.4.0" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
+    { name = "pyyaml", specifier = ">=6.0.2" },
+]
+
+[[package]]
 name = "numpy"
 version = "1.26.4"
 source = { registry = "https://pypi.org/simple" }
@@ -324,11 +324,11 @@ wheels = [
 
 [[package]]
 name = "py4j"
-version = "0.10.9.7"
+version = "0.10.9.9"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/1e/f2/b34255180c72c36ff7097f7c2cdca02abcbd89f5eebf7c7c41262a9a0637/py4j-0.10.9.7.tar.gz", hash = "sha256:0b6e5315bb3ada5cf62ac651d107bb2ebc02def3dee9d9548e3baac644ea8dbb", size = 1508234 }
+sdist = { url = "https://files.pythonhosted.org/packages/38/31/0b210511177070c8d5d3059556194352e5753602fa64b85b7ab81ec1a009/py4j-0.10.9.9.tar.gz", hash = "sha256:f694cad19efa5bd1dee4f3e5270eb406613c974394035e5bfc4ec1aba870b879", size = 761089 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/10/30/a58b32568f1623aaad7db22aa9eafc4c6c194b429ff35bdc55ca2726da47/py4j-0.10.9.7-py2.py3-none-any.whl", hash = "sha256:85defdfd2b2376eb3abf5ca6474b51ab7e0de341c75a02f46dc9b5976f5a5c1b", size = 200481 },
+    { url = "https://files.pythonhosted.org/packages/bd/db/ea0203e495be491c85af87b66e37acfd3bf756fd985f87e46fc5e3bf022c/py4j-0.10.9.9-py2.py3-none-any.whl", hash = "sha256:c7c26e4158defb37b0bb124933163641a2ff6e3a3913f7811b0ddbe07ed61533", size = 203008 },
 ]
 
 [[package]]

@@ -1,17 +1,12 @@
 from typing import List, Optional
 from pydantic import BaseModel, ConfigDict
 import pandas as pd
-from core.logging_config import get_logger
-
-
-logger = get_logger(__name__)
 
 class Dataset(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
     name: str
     data: pd.DataFrame
-    file_format: str = "parquet"
     subdirectory: Optional[str] = None
     
     def get_file_path(self, base_path: str) -> str:

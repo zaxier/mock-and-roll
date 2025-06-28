@@ -13,6 +13,7 @@ from src.core.catalog import (
 )
 
 
+@pytest.mark.unit
 class TestVolumeExists:
     """Test volume_exists function."""
     
@@ -50,6 +51,7 @@ class TestVolumeExists:
         assert result == False
 
 
+@pytest.mark.unit
 class TestCreateVolume:
     """Test create_volume function."""
     
@@ -100,6 +102,7 @@ class TestCreateVolume:
         assert result == False
 
 
+@pytest.mark.unit
 class TestEnsureCatalogSchemaVolume:
     """Test ensure_catalog_schema_volume function with volume auto-creation."""
     

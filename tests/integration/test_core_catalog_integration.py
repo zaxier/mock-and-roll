@@ -208,7 +208,7 @@ class TestCatalogIntegrationLogging:
         assert mock_logger.info.called or mock_logger.warning.called or mock_logger.error.called
 
 
-@pytest.mark.integration  
+@pytest.mark.integration
 @pytest.mark.spark
 class TestCatalogIntegrationPerformance:
     """Integration tests focused on performance and resource usage."""

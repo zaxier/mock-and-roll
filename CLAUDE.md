@@ -3,7 +3,7 @@
 # Project Information
 project:
   name: "AI-Native Demo Framework for Databricks Solution Architects"
-  repository: "custom-demo-accelerator"
+  repository: "mock-and-roll"
   type: "databricks-demo-framework"
   purpose: "Generate synthetic data pipelines for client demonstrations using AI-powered development"
 
@@ -12,7 +12,7 @@ agent_persona:
   role: "Highly-experienced data engineer specializing in AI-accelerated development"
   responsibilities: "Generate data pipelines, write code, refactor, configure, manage synthetic data generation"
   tone: "Precise, reliable, self-documenting, AI-native approach"
-  focus: "Exponential AI acceleration in software engineering - from coder to architect"
+  focus: "Precision and reliability for synthetic data pipeline generation"
 
 # Development Environment Setup
 environment:
@@ -27,31 +27,42 @@ commands:
   activate_venv: "source .venv/bin/activate"
   install_dependencies: "uv sync"
   install_editable: "uv pip install -e ."
-  add_dependency: "uv add <package-name>"
   run_tests: "python -m pytest"
-  run_demo_module: "python -m <demo_name>.main"
-  run_demo_with_overrides: "python -m <demo_name>.main --schema custom_schema --catalog custom_catalog --records 500"
-  databricks_auth: "databricks auth login --host <workspace-url>"
+  run_demo_module: "python -m demos.<demo_name>.main"
+  run_demo_with_overrides: "python -m demos.<demo_name>.main --schema custom_schema --catalog custom_catalog --records 500"
 
 # Coding Conventions and Architecture
 
 ## Core Import Patterns (NO src prefix - handled by pyproject.toml)
-Always import these core modules without 'src' prefix:
-- `from config import get_config, Config`
-- `from core.spark import get_spark`
-- `from core.catalog import ensure_catalog_schema_volume`
-- `from core.io import batch_load_with_copy_into, write_stream_to_delta, save_to_volume, save_datamodel_to_volume, batch_load_datamodel_from_volume`
-- `from core.data import Dataset, DataModel`
-- `from core.logging_config import setup_logging, get_logger`
-- `from core.workspace import get_workspace_schema_url`
-- `from core.cli import parse_demo_args, get_demo_args_with_config`
+Import core modules without 'src' prefix. Use the simplified import pattern for cleaner code:
+
+### Simplified Import Pattern (PREFERRED):
+```python
+# Import config separately
+from config import get_config, Config
+
+# Import all core functions from the core module
+from core import *
+```
+
+### Legacy Import Pattern (still supported):
+```python
+from core import (
+    get_spark, setup_logging, get_logger,
+    parse_demo_args, get_demo_args_with_config,
+    ensure_catalog_schema_volume,
+    save_datamodel_to_volume, batch_load_datamodel_from_volume,
+    save_to_volume, batch_load_with_copy_into, get_bronze_table_name,
+    Dataset, DataModel, get_workspace_schema_url
+)
+```
 
 ## Function Invocation Patterns
 Follow these prescriptive patterns for core functionality:
 
 ### CLI Argument Parsing (REQUIRED for all new demos):
 ```python
-from core.cli import parse_demo_args, get_demo_args_with_config
+from core import parse_demo_args, get_demo_args_with_config
 
 # Standard usage - parse CLI arguments for demo
 cli_overrides = parse_demo_args("Sales Demo Pipeline")
@@ -67,25 +78,27 @@ cli_overrides = parse_demo_args("Custom Demo Pipeline", custom_args)
 ### Configuration Loading:
 ```python
 from config import get_config, Config
-from core.logging_config import setup_logging, get_logger
+from core import setup_logging, get_logger
 
-# Setup centralized logging first
-setup_logging(level="INFO", include_timestamp=True, include_module=True)
+# Load configuration first
+config: Config = get_config()
+
+# Setup centralized logging using configured level
+setup_logging(level=config.logging.level, include_timestamp=True, include_module=True)
 logger = get_logger(__name__)
 
-config: Config = get_config()
 # Access nested attributes: config.databricks.catalog, config.data_generation.default_records
 ```
 
 ### Spark Session Initialization:
 ```python
-from core.spark import get_spark
+from core import get_spark
 spark = get_spark()  # Handles DatabricksSession vs serverless fallback automatically
 ```
 
 ### Resource Management:
 ```python
-from core.catalog import ensure_catalog_schema_volume
+from core import ensure_catalog_schema_volume
 ready: bool = ensure_catalog_schema_volume(
     spark=spark,
     catalog_name=config.databricks.catalog,
@@ -100,13 +113,12 @@ ready: bool = ensure_catalog_schema_volume(
 ### Data I/O Operations:
 ```python
 # High-level operations with DataModel (PREFERRED for multiple datasets)
-from core.data import Dataset, DataModel
-from core.io import save_datamodel_to_volume, batch_load_datamodel_from_volume
+from core import Dataset, DataModel, save_datamodel_to_volume, batch_load_datamodel_from_volume
 
 # Create structured datasets
 datasets = [
-    Dataset(name="customers", data=customers_df, file_format="parquet"),
-    Dataset(name="orders", data=orders_df, file_format="parquet", subdirectory="transactions")
+    Dataset(name="customers", data=customers_df),
+    Dataset(name="orders", data=orders_df, subdirectory="transactions")
 ]
 data_model = DataModel(datasets=datasets)
 
@@ -118,13 +130,12 @@ saved_paths = save_datamodel_to_volume(
     base_subdirectory="raw"
 )
 
-# Load all datasets to Delta tables
+# Load all datasets to Delta tables (creates bronze tables with _bronze suffix)
 loaded_dfs = batch_load_datamodel_from_volume(
     spark=spark,
     data_model=data_model,
     config=config,
     source_subdirectory="raw",
-    target_schema_suffix="_bronze",
     drop_tables_if_exist=True
 )
 ```
@@ -139,25 +150,24 @@ config: Config = get_config()  # Returns: Config object with nested attributes
 
 ### Spark Functions
 ```python
-from core.spark import get_spark
+from core import get_spark
 spark: SparkSession = get_spark()  # Returns: SparkSession instance
 ```
 
 ### Catalog Functions
 ```python
-from core.catalog import ensure_catalog_schema_volume
+from core import ensure_catalog_schema_volume
 ready: bool = ensure_catalog_schema_volume(...)  # Returns: bool (True if successful)
 ```
 
 ### Data Model Classes
 ```python
-from core.data import Dataset, DataModel
+from core import Dataset, DataModel
 
 # Dataset class constructor
 dataset = Dataset(
     name: str,                    # Required: dataset name
     data: pd.DataFrame,           # Required: pandas DataFrame
-    file_format: str = "parquet", # Optional: file format (default: "parquet")
     subdirectory: Optional[str] = None  # Optional: subdirectory path
 )
 
@@ -180,7 +190,8 @@ from core.io import (
     save_to_volume, 
     save_datamodel_to_volume, 
     batch_load_with_copy_into,
-    batch_load_datamodel_from_volume
+    batch_load_datamodel_from_volume,
+    get_bronze_table_name
 )
 
 # Single dataset save
@@ -188,7 +199,6 @@ save_to_volume(
     spark: SparkSession,
     df: pd.DataFrame | DataFrame,  # Pandas or PySpark DataFrame
     file_path: str,
-    file_format: str = "parquet"
 ) -> None  # Returns: None
 
 # Multiple datasets save via DataModel
@@ -210,15 +220,19 @@ batch_load_with_copy_into(
     copy_options: dict = None
 ) -> DataFrame  # Returns: PySpark DataFrame (SELECT * FROM target_table)
 
-# Multiple datasets batch load via DataModel
+# Multiple datasets batch load via DataModel (creates bronze tables)
 batch_load_datamodel_from_volume(
     spark: SparkSession,
     data_model: DataModel,
     config: Config,
     source_subdirectory: str = "raw",
-    target_schema_suffix: str = "_bronze",
     drop_tables_if_exist: bool = False
 ) -> List[DataFrame]  # Returns: List of PySpark DataFrames
+
+# Table naming utility
+get_bronze_table_name(
+    dataset_name: str
+) -> str  # Returns: Bronze table name with _bronze suffix
 ```
 
 ### Logging Functions
@@ -264,17 +278,20 @@ Sequence: CLI parsing → logging setup → data generation → batch pipeline �
 
 **ALWAYS start main.py with:**
 ```python
-from core.cli import parse_demo_args
-from core.logging_config import setup_logging, get_logger
-from core.workspace import get_workspace_schema_url
 from config import get_config
+from core import *
+
+from .datasets import generate_datamodel
 
 def main():
     # Parse command line arguments using centralized parsing (REQUIRED)
     cli_overrides = parse_demo_args("Your Demo Pipeline Description")
     
-    # Setup centralized logging first
-    setup_logging(level="INFO")
+    # Load configuration with CLI overrides
+    config = get_config(cli_overrides=cli_overrides)
+    
+    # Setup centralized logging using configured level
+    setup_logging(level=config.logging.level)
     logger = get_logger(__name__)
     
     try:
@@ -282,9 +299,6 @@ def main():
         
         if cli_overrides:
             logger.info(f"CLI overrides provided: {cli_overrides}")
-        
-        # Load configuration with CLI overrides
-        config = get_config(cli_overrides=cli_overrides)
         
         # Your pipeline logic here
         
@@ -309,7 +323,7 @@ def main():
 - **PREFERRED**: Use DataModel and Dataset classes for structured data handling
 - Write to Databricks Volume path in configured format (csv/json/parquet). Prefer PARQUET.
 - **CRITICAL**: Read ai_docs/mimesis_usage_guide.md to avoid common issues
-- **REFERENCE**: Use ai_docs/providers_api_reference.md for comprehensive provider method documentation
+- **CRITICAL**: Use the mimesis provider api reference below, between the tags: <mimesis_provider_api_reference> </mimesis_provider_api_reference>
 
 Example:
 ```python
@@ -319,7 +333,8 @@ import pandas as pd
 from mimesis import Person, Finance, Datetime, Numeric, Address, Choice
 from mimesis.locales import Locale
 
-from core.data import DataModel, Dataset
+from core import DataModel, Dataset
+from config import Config
 
 def generate_user_profiles(num_records=100) -> pd.DataFrame:
     """Generate user profile dataset"""
@@ -343,7 +358,7 @@ def generate_user_profiles(num_records=100) -> pd.DataFrame:
         'customer_type': [choice.choice(['individual', 'business']) for _ in range(num_records)]
     })
 
-def generate_sales_data(user_ids: List[str], num_records=50) -> pd.DataFrame:
+def generate_sales_data(user_ids: List[str], num_records=500) -> pd.DataFrame:
     """Generate product sales dataset with user_id as foreign key"""
     finance = Finance()
     dt = Datetime()
@@ -362,52 +377,44 @@ def generate_sales_data(user_ids: List[str], num_records=50) -> pd.DataFrame:
         'payment_method': [choice.choice(['Credit Card', 'Debit Card', 'PayPal', 'Cash']) for _ in range(num_records)]
     })
 
-# Create Dataset instances with proper relationships ------------------
-# Generate users first to get their IDs
-users_data = generate_user_profiles()
-users_dataset = Dataset(
-    name="user_profiles",
-    data=users_data
-)
-
-# Generate sales data using actual user IDs from the users dataset
-sales_data = generate_sales_data(user_ids=users_data['user_id'].tolist())
-sales_dataset = Dataset(
-    name="product_sales",
-    data=sales_data
-)
-
-# Organize into DataModel ---------------------------------------------
-data_model = DataModel(
-    datasets=[users_dataset, sales_dataset]
-)
-
-# # Example usage -------------------------------------------------------
-# print(f"DataModel contains {len(data_model.datasets)} datasets")
-# print("Dataset names:", [ds.name for ds in data_model.datasets])
-
-# # Access first dataset's DataFrame
-# user_df = data_model.datasets[0].data
-# print("\nUser profile sample:")
-# print(user_df.head(3))
-
-# # Access sales data with user_id join key
-# sales_df = data_model.datasets[1].data
-# print("\nSales data sample:")
-# print(sales_df.head(3))
-
-# # Calculate total sales
-# total_sales = sales_df['amount'].sum()
-# print(f"\nTotal sales: ${total_sales:,.2f}")
-
-# # Example join operation
-# joined_data = user_df.merge(sales_df, on='user_id', how='inner')
-# print(f"\nJoined data sample (showing users with sales):")
-# print(joined_data[['full_name', 'email', 'product', 'amount', 'sale_date']].head(3))
-
-
+def generate_datamodel(config: Config, num_records: int = 1000) -> DataModel:
+    """
+    Generate all datasets for the demo.
+    
+    This creates a star schema with user profiles as the dimension table
+    and sales transactions as the fact table.
+    """
+    # Use configured number of records or override
+    base_records = num_records or config.data_generation.default_records
+    
+    # Scale datasets appropriately
+    num_sales = base_records
+    num_users = base_records // 5  # Average 5 transactions per user
+    
+    # Generate users first to get their IDs
+    users_data = generate_user_profiles(num_users)
+    users_dataset = Dataset(
+        name="user_profiles",
+        data=users_data
+    )
+    
+    # Generate sales data using actual user IDs from the users dataset
+    sales_data = generate_sales_data(
+        user_ids=users_data['user_id'].tolist(),
+        num_records=num_sales
+    )
+    sales_dataset = Dataset(
+        name="product_sales",
+        data=sales_data
+    )
+    
+    # Organize into DataModel
+    # AI Agent Instructions: This DataModel provides a complete star schema
+    # with proper foreign key relationships for realistic retail analytics
+    return DataModel(
+        datasets=[users_dataset, sales_dataset]
+    )
 ```
-
 
 ## Medallion Architecture Implementation
 - Bronze: raw data from volumes
@@ -417,7 +424,7 @@ data_model = DataModel(
 ## Batch Ingestion
 - Use the batch copy into function in core.io for ingestion
 - Load from Volume → write to Delta table
-- Follow example in @src/reference_demos/sales_demo
+- Follow example in @src/examples/sales_demo
 
 # Configuration Management
 
@@ -439,17 +446,18 @@ Support for runtime configuration overrides via command line arguments:
 - `--catalog CATALOG` - Override Databricks catalog name  
 - `--volume VOLUME` - Override Databricks volume name
 - `--records RECORDS` - Override number of records to generate
+- `--log-level LOG_LEVEL` - Override the logging level
 
 Examples:
 ```bash
 # Use custom schema
-python -m reference_demos.sales_demo --schema my_test_schema
+python -m examples.sales_demo --schema my_test_schema
 
 # Multiple overrides
-python -m reference_demos.sales_demo --schema test --catalog dev_catalog --records 500
+python -m examples.sales_demo --schema test --catalog dev_catalog --records 500
 
 # Help for available options
-python -m reference_demos.sales_demo --help
+python -m examples.sales_demo --help
 ```
 
 CLI arguments take highest precedence, overriding all other configuration sources.
@@ -469,8 +477,8 @@ CLI arguments take highest precedence, overriding all other configuration source
 ## Agent-Optimized Patterns
 When generating new demos, follow these patterns:
 - Embedded prompts in docstrings guide AI development
-- Invisible configuration management for seamless presentations
-- Exponential scaling through AI amplification
+- When upgrading the code in @src/core or the example demos in @src/examples please consider if @CLAUDE.md needs to be updated to keep it in sync.
+**CRITICAL**: When building new demos test them end to end.
 
 ## Workspace URL Presentation for AI Agents
 **CRITICAL**: When running demos, AI agents MUST capture and present the workspace URL to users:
@@ -505,29 +513,29 @@ transaction_date = generic.datetime.datetime(
 
 ## Error Handling
 - **ALWAYS** use centralized logging from `core.logging_config`
-- Setup logging at the start of every main.py: `setup_logging()`
+- Setup logging at the start of every main.py: `setup_logging(level=config.logging.level)`
 - Get module-specific loggers: `logger = get_logger(__name__)`
-- Use consistent log levels: INFO for progress, ERROR for failures
 - Return appropriate exit codes on failures
 - Handle both datetime.date and datetime.datetime object conflicts
+- **CRITICAL**: If you're having repeated troubles (say ~5x failures) with silver or gold layer tables you may try removing them from the pipeline and running a simpler pipeline finishes without error. 
 
 # Development Workflow
 
 ## When Creating New Demos
 1. If the user doesn't specify, ask for a dataset type such as the source of data to mimic or a use case that needs to be fulfilled.
 2. Clarify requirements before code generation
-3. **MANDATORY**: Use centralized CLI parsing with `from core.cli import parse_demo_args`
+3. **MANDATORY**: Use centralized CLI parsing with `from core import parse_demo_args`
 4. **Use the core and config modules in src**. E.g. use logging_config.py for logging. Use spark.py for setting up spark sessions. Etc.
 5. Use mimesis for realistic synthetic data generation
 6. **Use DataModel/Dataset pattern** for multiple related datasets
-7. Execute new scripts as modules: `python -m customer_demos.<demo_name>.main`
-8. Test thoroughly with realistic data volumes
+7. Execute new scripts as modules: `python -m demos.<demo_name>` (assuming __main__.py has been implemented) or `python -m demos.<demo_name>.main`
+8. Test thoroughly with realistic data volumes. After building the code, run the demo end-to-end and attempt to fix any errors encountered.
 
-**CLI Parsing Requirement**: ALL new demos MUST use `parse_demo_args()` from `core.cli` to ensure consistent CLI interface across all demos. This provides standard arguments (--schema, --catalog, --volume, --records, --format, --log-level) automatically.
+**CLI Parsing Requirement**: ALL new demos MUST use `parse_demo_args()` from `core` to ensure consistent CLI interface across all demos. This provides standard arguments (--schema, --catalog, --volume, --records, --format, --log-level) automatically.
 
 ## File Organization
-- New demos go in `src/customer_demos/<demo_name>/` directory
-- Follow existing implementation patterns of `src/reference_demos` for example `src/reference_demos/sales_demo` dir
+- New demos go in `src/demos/<demo_name>/` directory
+- Follow existing implementation patterns of `src/examples` for example `src/examples/sales_demo` dir
 - **REQUIRED**: Each new demo directory must contain exactly these 4 files:
   1. `__init__.py` - Empty Python package file
   2. `__main__.py` - Entry point for running the demo as a module
@@ -537,7 +545,7 @@ transaction_date = generic.datetime.datetime(
 
 # Testing and Validation
 - Run `python -m pytest` for unit tests
-- Test demos end-to-end before client presentations
+- Test demos end-to-end before client presentations. After building the code, run the demo end-to-end and attempt to fix any errors encountered.
 
 # Dependencies and Versions
 - Python 3.12+ required

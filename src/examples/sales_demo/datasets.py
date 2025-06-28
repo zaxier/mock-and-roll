@@ -18,6 +18,8 @@ from mimesis import Person, Finance, Datetime, Numeric, Address, Choice
 from mimesis.locales import Locale
 
 from core.data import DataModel, Dataset
+from config import Config
+
 
 def generate_user_profiles(num_records=100) -> pd.DataFrame:
     """Generate user profile dataset"""
@@ -41,7 +43,8 @@ def generate_user_profiles(num_records=100) -> pd.DataFrame:
         'customer_type': [choice.choice(['individual', 'business']) for _ in range(num_records)]
     })
 
-def generate_sales_data(user_ids: List[str], num_records=50) -> pd.DataFrame:
+
+def generate_sales_data(user_ids: List[str], num_records=500) -> pd.DataFrame:
     """Generate product sales dataset with user_id as foreign key"""
     finance = Finance()
     dt = Datetime()
@@ -60,47 +63,43 @@ def generate_sales_data(user_ids: List[str], num_records=50) -> pd.DataFrame:
         'payment_method': [choice.choice(['Credit Card', 'Debit Card', 'PayPal', 'Cash']) for _ in range(num_records)]
     })
 
-# Create Dataset instances with proper relationships ------------------
-# Generate users first to get their IDs
-users_data = generate_user_profiles()
-users_dataset = Dataset(
-    name="user_profiles",
-    data=users_data
-)
 
-# Generate sales data using actual user IDs from the users dataset
-sales_data = generate_sales_data(user_ids=users_data['user_id'].tolist())
-sales_dataset = Dataset(
-    name="product_sales",
-    data=sales_data
-)
+def generate_datamodel(config: Config, num_records: int = None) -> DataModel:
+    """
+    Generate all datasets for the sales demo.
+    
+    This creates a star schema with user profiles as the dimension table
+    and sales transactions as the fact table.
+    """
+    # Use configured number of records or override
+    base_records = num_records or config.data_generation.default_records
+    
+    # Scale datasets appropriately
+    num_sales = base_records
+    num_users = base_records // 5 # Average 5 users per transaction
+    
+    # Generate users first to get their IDs
+    users_data = generate_user_profiles(num_users)
+    users_dataset = Dataset(
+        name="user_profiles",
+        data=users_data
+    )
+    
+    # Generate sales data using actual user IDs from the users dataset
+    sales_data = generate_sales_data(
+        user_ids=users_data['user_id'].tolist(),
+        num_records=num_sales
+    )
+    sales_dataset = Dataset(
+        name="product_sales",
+        data=sales_data
+    )
+    
+    # Organize into DataModel
+    # AI Agent Instructions: This DataModel provides a complete star schema
+    # with proper foreign key relationships for realistic retail analytics
+    return DataModel(
+        datasets=[users_dataset, sales_dataset]
+    )
 
-# Organize into DataModel ---------------------------------------------
-# AI Agent Instructions: This DataModel provides a complete star schema
-# with proper foreign key relationships for realistic retail analytics
-data_model = DataModel(
-    datasets=[users_dataset, sales_dataset]
-)
 
-# # Example usage -------------------------------------------------------
-# print(f"DataModel contains {len(data_model.datasets)} datasets")
-# print("Dataset names:", [ds.name for ds in data_model.datasets])
-
-# # Access first dataset's DataFrame
-# user_df = data_model.datasets[0].data
-# print("\nUser profile sample:")
-# print(user_df.head(3))
-
-# # Access sales data with user_id join key
-# sales_df = data_model.datasets[1].data
-# print("\nSales data sample:")
-# print(sales_df.head(3))
-
-# # Calculate total sales
-# total_sales = sales_df['amount'].sum()
-# print(f"\nTotal sales: ${total_sales:,.2f}")
-
-# # Example join operation
-# joined_data = user_df.merge(sales_df, on='user_id', how='inner')
-# print(f"\nJoined data sample (showing users with sales):")
-# print(joined_data[['full_name', 'email', 'product', 'amount', 'sale_date']].head(3))

@@ -23,6 +23,7 @@ from core.io import (
 
 @pytest.mark.integration
 @pytest.mark.spark
+@pytest.mark.databricks
 class TestIOIntegrationBasic:
     """Basic integration tests for I/O operations."""
     
@@ -74,6 +75,7 @@ class TestIOIntegrationBasic:
 
 @pytest.mark.integration
 @pytest.mark.spark
+@pytest.mark.databricks
 class TestIOIntegrationStreaming:
     """Integration tests for streaming operations."""
     
@@ -129,6 +131,7 @@ class TestIOIntegrationStreaming:
 
 @pytest.mark.integration
 @pytest.mark.spark
+@pytest.mark.databricks
 class TestIOIntegrationBatchLoad:
     """Integration tests for batch load operations."""
     
@@ -199,6 +202,7 @@ class TestIOIntegrationBatchLoad:
 
 @pytest.mark.integration
 @pytest.mark.spark
+@pytest.mark.databricks
 class TestIOIntegrationEndToEnd:
     """End-to-end integration tests combining multiple I/O operations."""
     
@@ -280,6 +284,7 @@ class TestIOIntegrationEndToEnd:
 
 @pytest.mark.integration
 @pytest.mark.spark
+@pytest.mark.databricks
 class TestIOIntegrationPerformance:
     """Performance-focused integration tests."""
     
@@ -373,6 +378,7 @@ class TestIOIntegrationPerformance:
 
 @pytest.mark.integration
 @pytest.mark.spark
+@pytest.mark.databricks
 class TestIOIntegrationErrorHandling:
     """Integration tests focused on error handling and edge cases."""
     
