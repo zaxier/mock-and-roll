@@ -91,6 +91,7 @@ When you ask Claude or Goose to create a demo, it:
 3. Follows the standardized structure (always knows where code goes)
 4. Leverages embedded examples for synthetic data generation
 5. Applies learned lessons 
+6. Tests and iterates on the code to ensure it runs
 
 This design means AI can focus on your specific business logic rather than infrastructure, resulting in working demos in minutes instead of hours.
 
