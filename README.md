@@ -44,10 +44,6 @@ goose -t "Create a new synthetic data pipeline for [your industry] with [specifi
 claude "Create a new synthetic data pipeline for [your industry] with [specific requirements/use cases]"
 ```
 
-### Extend with CLI coding agent (Goose/Claude Code/Gemini CLI etc)
-Run CLI coding agent in repository root and prompt:
-> "Create a new synthetic dataset for [your industry] with [specific requirements]"
-
 Watch as AI generates complete data pipelines—synthetic data creation, ingestion, ETL—all orchestrated seamlessly.
 
 ## 🎯 Perfect for Databricks Solution Architects
