@@ -18,7 +18,7 @@ Transform client demonstrations with AI-generated synthetic data pipelines.
 ### Zero-to-Demo in 5 Minutes
 ```bash
 # 1. Installation
-git clone <repo-url> && cd mock-and-roll
+git clone https://github.com/xavier-armitage_data/mock-and-roll.git && cd mock-and-roll
 make install  # or `uv sync`
 
 # 2. Authenticate to databricks workspace
