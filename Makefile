@@ -1,4 +1,4 @@
-# Makefile for custom-demo-accelerator
+# Makefile for mock-and-roll
 
 .PHONY: all help install clean test test-unit test-integration test-spark test-databricks run-demo add-dep auth-databricks show-config drop-schema sync-docs
 

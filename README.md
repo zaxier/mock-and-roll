@@ -1,28 +1,33 @@
 
 # AI-Native Demo Framework for Databricks Solution Architects
 
-> **"This is not just a repository. This is a demonstration of the future of software development."**
-
-Transform client demonstrations with AI-generated synthetic data pipelines. Experience the exponential acceleration of AI-powered development where coding agents like Claude Code elevate software engineering from implementation to architecture.
+Transform client demonstrations with AI-generated synthetic data pipelines.
 
 ## 🚀 Quick Start
 
 ### Zero-to-Demo in 5 Minutes
 ```bash
 # 1. Installation
-git clone <repo-url> && cd custom-demo-accelerator
+git clone <repo-url> && cd mock-and-roll
 make install
 
-# 2. Configuration (minimal setup)
-echo "DATABRICKS_CATALOG=demo_catalog" > .env.local
-echo "DATABRICKS_SCHEMA=synthetic_data" >> .env.local
+# 2. Activate python env (or use `uv run python...` instead of `python...` below)
+source .venv/bin/activate
 
-# 3. Generate your first AI-powered demo
+# 3. Authenticate to databricks workspace
+databricks auth login --host <workspace_url> --profile <profile_name>
+
+# 4. Configuration (minimal setup)
+echo "DATABRICKS_CATALOG=<your_catalog>" > .env.local
+echo "DATABRICKS_SCHEMA=<your_schema>" >> .env.local
+echo "DATABRICKS_CONFIG_PROFILE=<profile_name>" >> .env.local
+
+# 5. Generate your first demo data to ensure everything is running smoothly
 python -m examples.sales_demo.main
 ```
 
-### Extend with Claude Code
-Open the repository in Claude Code and prompt:
+### Extend with CLI coding agent (Goose/Claude Code/Gemini CLI etc)
+Run CLI coding agent in repository root and prompt:
 > "Create a new synthetic dataset for [your industry] with [specific requirements]"
 
 Watch as AI generates complete data pipelines—synthetic data creation, ingestion, ETL—all orchestrated seamlessly.
@@ -36,27 +41,10 @@ Watch as AI generates complete data pipelines—synthetic data creation, ingesti
 - **📊 Realistic Data**: Mimesis-powered synthetic data that mirrors real-world scenarios
 - **🔧 Zero-Config Demos**: Invisible configuration management for seamless presentations
 
-### Demo Scenarios Included
-
-| Demo | Industry | Features | Use Case |
-|------|----------|----------|----------|
-| Financial Trading | Fintech | HFT, Risk Analytics, Compliance | Real-time processing, regulatory reporting |
-| NetSuite ERP | Enterprise | Inventory, Customers, Transactions | ERP integration, business intelligence |
-| Retail Analytics | E-commerce | Products, Orders, Customer 360 | Personalization, supply chain optimization |
-| Healthcare | MedTech | Patients, Treatments, Outcomes | Clinical analytics, regulatory compliance |
-
 ## 🌟 AI-Native Architecture
 
 ### The Vision: Exponential AI Acceleration
-```
-**Exponential growth in AI acceleration**
-     ^
-     |
-    ||
-  .|||
-```
-
-This repository showcases how modern coding agents are transforming software engineering. The magic isn't in complexity; it's in invisible, elegant execution.
+This repository showcases how modern coding agents are transforming software engineering.
 
 ### Strategic Prompt Engineering
 High-quality prompts are strategically embedded throughout the codebase, enabling:
@@ -64,31 +52,9 @@ High-quality prompts are strategically embedded throughout the codebase, enablin
 - **Self-Documenting Code**: AI agents understand purpose and extend functionality
 - **Exponential Scaling**: Patterns that amplify with AI capabilities
 
-### From Coder to Architect
-**The New Development Paradigm:**
-- Humans focus on strategic design and architectural decisions
-- AI agents handle implementation details and code generation
-- Prompt engineering becomes the primary development skill
-- Software engineering transcends pure logic to embrace creativity
-
 ## 🔧 Framework Features
 
-### Invisible Configuration
-Configuration operates transparently in the background, supporting agent reliability without cognitive overhead during demos.
-
-```python
-# Just import and use - configuration happens automatically
-from config import get_config
-from core.spark import get_spark
-from core.logging_config import setup_logging
-from core.data import Dataset, DataModel
-
-setup_logging()       # Configure consistent logging
-config = get_config() # Automatically loads environment
-spark = get_spark()   # Handles Databricks connection
-```
-
-### Agent-Optimized Patterns
+### Datagen helper functions
 ```python
 # High-level data operations with Pydantic models
 from core.data import Dataset, DataModel
@@ -96,8 +62,8 @@ from core.io import save_datamodel_to_volume, batch_load_datamodel_from_volume
 
 # Create structured datasets
 datasets = [
-    Dataset(name="customers", data=customers_df, file_format="parquet"),
-    Dataset(name="orders", data=orders_df, file_format="parquet")
+    Dataset(name="customers", data=customers_df),
+    Dataset(name="orders", data=orders_df)
 ]
 data_model = DataModel(datasets=datasets)
 
@@ -119,24 +85,15 @@ This repository uses a layered configuration system. Settings are applied with t
 
 > **Note**: For most users, you shouldn't need to modify the `config/*.yml` files. The framework is designed to work out-of-the-box with sensible defaults. Use `.env.local` for personal overrides and CLI arguments for runtime customization.
 
-### Multi-Layer Configuration System
-**Precedence (Lowest → Highest):**
-1. `config/base.yml` - Base defaults
-2. `config/environments/{env}.yml` - Environment overrides
-3. `.env` - Team defaults (committed)
-4. `.env.local` - Personal overrides (gitignored)
-5. Environment variables - Runtime/deployment
-6. CLI arguments - Command line overrides
-
 ## 🏗️ Architecture Overview
 
 ### Package Structure
 ```
 src/
-├── config/          # Multi-layer configuration (invisible in demos)
-├── core/            # Reusable utilities (Spark, I/O, Catalog)
-├── examples/        # Demo templates for extension
-└── [your_demo]/     # Generated demo pipelines
+├── config/               # Multi-layer configuration (invisible in demos)
+├── core/                 # Reusable utilities (Spark, I/O, Catalog)
+├── examples/             # Demo templates for extension
+└── demos/[your_demo]/    # Generated demo pipelines
 ```
 
 ### Core Components
@@ -167,6 +124,7 @@ src/
 "Generate a supply chain demo for automotive manufacturing"
 "Build a customer 360 pipeline for telecommunications"
 ```
+The more specific the better the result.
 
 ## ⚡ Development Commands
 
@@ -189,14 +147,6 @@ make drop-schema         # Drop Databricks schema
 make clean              # Clean build artifacts and caches
 ```
 
-## 🔗 Databricks Integration
-
-### Authentication
-```bash
-databricks auth login --host <workspace-url>
-```
-Choose a name for your profile (you'll need it again below)
-
 ## 📚 Getting Started
 
 ### Prerequisites
@@ -209,7 +159,7 @@ Choose a name for your profile (you'll need it again below)
 1. **Clone and Install**
    ```bash
    git clone <repo-url>
-   cd custom-demo-accelerator
+   cd mock-and-roll
    make install
    ```
 
@@ -224,7 +174,7 @@ Choose a name for your profile (you'll need it again below)
 
 3. **Authenticate with Databricks** (if using Databricks features)
    ```bash
-   databricks auth login --host https://your-workspace.cloud.databricks.com
+   databricks auth login --host https://your-workspace.cloud.databricks.com --profile your_auth_profile
    ```
 
 4. **Verify Installation**
@@ -252,7 +202,7 @@ Run `make help` to see all available commands, or refer to the [Development Comm
 ## 🔧 Dependencies
 
 - Python 3.12+
-- `databricks-connect>=16.3.0`
+- `databricks-connect>=16.4.0`
 - `mimesis>=18.0.0` 
 - `python-dotenv>=1.0.0`
 

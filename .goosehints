@@ -3,7 +3,7 @@
 # Project Information
 project:
   name: "AI-Native Demo Framework for Databricks Solution Architects"
-  repository: "custom-demo-accelerator"
+  repository: "mock-and-roll"
   type: "databricks-demo-framework"
   purpose: "Generate synthetic data pipelines for client demonstrations using AI-powered development"
 

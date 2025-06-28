@@ -12,7 +12,6 @@ from core.catalog import ensure_catalog_schema_volume
 
 @pytest.mark.integration
 @pytest.mark.spark
-@pytest.mark.databricks
 class TestCatalogIntegrationWorkflows:
     """Integration tests for complete catalog workflow scenarios."""
     
@@ -97,7 +96,6 @@ class TestCatalogIntegrationWorkflows:
 
 @pytest.mark.integration
 @pytest.mark.spark
-@pytest.mark.databricks
 class TestCatalogIntegrationWithMocking:
     """Integration tests that combine real Spark with strategic mocking for Databricks-specific features."""
     
@@ -189,7 +187,6 @@ class TestCatalogIntegrationWithMocking:
 
 @pytest.mark.integration
 @pytest.mark.spark
-@pytest.mark.databricks
 class TestCatalogIntegrationLogging:
     """Integration tests focused on logging behavior."""
     
@@ -213,7 +210,6 @@ class TestCatalogIntegrationLogging:
 
 @pytest.mark.integration
 @pytest.mark.spark
-@pytest.mark.databricks
 class TestCatalogIntegrationPerformance:
     """Integration tests focused on performance and resource usage."""
     
