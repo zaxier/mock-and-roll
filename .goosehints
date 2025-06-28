@@ -1,4 +1,4 @@
-# .goosehints - Goose AI Context for AI-Native Databricks Demo Framework
+# AI Context for AI-Native Databricks Demo Framework
 
 # Project Information
 project:
@@ -829,6 +829,5 @@ for i in range(500):
 
 # Extensions and Tools
 If you need additional capabilities beyond the core framework:
-- Search for relevant Goose extensions
 - Consider web search tools for researching industry-specific patterns
 - Use MCP servers for additional data generation or processing capabilities

@@ -1,4 +1,4 @@
-# .goosehints - Goose AI Context for AI-Native Databricks Demo Framework
+# AI Context for AI-Native Databricks Demo Framework
 
 # Project Information
 project:
@@ -477,7 +477,6 @@ CLI arguments take highest precedence, overriding all other configuration source
 ## Agent-Optimized Patterns
 When generating new demos, follow these patterns:
 - Embedded prompts in docstrings guide AI development
-- When upgrading the code in @src/core or the example demos in @src/examples please consider if @CLAUDE.md needs to be updated to keep it in sync.
 **CRITICAL**: When building new demos test them end to end.
 
 ## Workspace URL Presentation for AI Agents
@@ -829,6 +828,5 @@ for i in range(500):
 
 # Extensions and Tools
 If you need additional capabilities beyond the core framework:
-- Search for relevant Goose extensions
 - Consider web search tools for researching industry-specific patterns
 - Use MCP servers for additional data generation or processing capabilities
