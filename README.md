@@ -59,7 +59,7 @@ Watch as AI generates complete data pipelines—synthetic data creation, ingesti
 This framework is designed specifically for AI coding assistants. Here's why Claude and other AI tools can generate complete synthetic data pipelines in seconds:
 
 ### 1. **CLAUDE.md/.goosehints - The AI's Instruction Manual**
-The repository contains a comprehensive `CLAUDE.md` file that serves as an AI context document. This file:
+The repository contains a comprehensive `CLAUDE.md` (identical to `.goosehints`) file that serves as an AI context document. This file:
 - Provides complete code patterns and examples for every common task
 - Documents all available functions with their exact signatures and return types
 - Contains best practices and common pitfalls (like mimesis date handling)
@@ -84,8 +84,8 @@ demos/your_demo/
 ```
 
 ### 4. **AI-Optimized Workflow**
-When you ask Claude to create a demo, it:
-1. Reads the CLAUDE.md for patterns and best practices
+When you ask Claude or Goose to create a demo, it:
+1. Reads the CLAUDE.md or .goosehints for patterns and best practices
 2. Uses the core functions as building blocks (no reinventing the wheel)
 3. Follows the standardized structure (always knows where code goes)
 4. Leverages embedded examples for synthetic data generation
