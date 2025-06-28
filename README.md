@@ -143,9 +143,9 @@ src/
 ### Example Customization
 ```bash
 # Use Claude Code with prompts like:
-"Create a synthetic dataset for pharmaceutical clinical trials"
+"Create a synthetic dataset for pharmaceutical clinical trials for a pharmaceutical company"
 "Generate a supply chain demo for automotive manufacturing"
-"Build a customer 360 pipeline for telecommunications"
+"Build a customer 360 pipeline for telecommunications company"
 ```
 The more specific the better the result.
 
@@ -181,9 +181,14 @@ Run `make help` to see all available commands, or refer to the [Development Comm
 ## 🔧 Dependencies
 
 - Python 3.12+
-- `databricks-connect>=16.4.0`
-- `mimesis>=18.0.0` 
+- `databricks-connect==16.4.1`
+- `databricks-dlt>=0.3.0`  # unused right now
+- `mimesis>=18.0.0`
+- `pandas>=2.2.3`
+- `pydantic>=2.11.7`
+- `pytest>=8.4.0`
 - `python-dotenv>=1.0.0`
+- `pyyaml>=6.0.2`
 
 ---
 
