@@ -54,25 +54,44 @@ Watch as AI generates complete data pipelines—synthetic data creation, ingesti
 - **🏗️ Extensible Architecture**: Pre-built skeleton for rapid customization
 - **📊 Realistic Data**: Mimesis-powered synthetic data that mirrors real-world scenarios
 
-## 🔧 Framework Features
+## 🤖 How AI Builds Demos So Easily
 
-### Datagen helper functions
-```python
-# High-level data operations with Pydantic models
-from core.data import Dataset, DataModel
-from core.io import save_datamodel_to_volume, batch_load_datamodel_from_volume
+This framework is designed specifically for AI coding assistants. Here's why Claude and other AI tools can generate complete synthetic data pipelines in seconds:
 
-# Create structured datasets
-datasets = [
-    Dataset(name="customers", data=customers_df),
-    Dataset(name="orders", data=orders_df)
-]
-data_model = DataModel(datasets=datasets)
+### 1. **CLAUDE.md/.goosehints - The AI's Instruction Manual**
+The repository contains a comprehensive `CLAUDE.md` file that serves as an AI context document. This file:
+- Provides complete code patterns and examples for every common task
+- Documents all available functions with their exact signatures and return types
+- Contains best practices and common pitfalls (like mimesis date handling)
+- Includes working examples of synthetic data generation patterns
 
-# Batch operations on multiple datasets
-save_datamodel_to_volume(spark, data_model, config)
-batch_load_datamodel_from_volume(spark, data_model, config)
+### 2. **Pre-built Core Functions**
+The `src/core/` directory provides battle-tested building blocks:
+- **`spark.py`**: Handles Spark session creation automatically
+- **`io.py`**: Provides high-level data I/O operations (save/load to volumes)
+- **`catalog.py`**: Manages Databricks resources (catalogs, schemas, volumes)
+- **`cli.py`**: Standardized CLI argument parsing for all demos
+- **`data.py`**: Pydantic models (Dataset, DataModel) for structured data handling
+
+### 3. **Standardized Demo Structure**
+Every demo follows the same 4-file pattern:
 ```
+demos/your_demo/
+├── __init__.py      # Package marker
+├── __main__.py      # Entry point
+├── main.py          # Pipeline orchestrator
+└── datasets.py      # Synthetic data generation
+```
+
+### 4. **AI-Optimized Workflow**
+When you ask Claude to create a demo, it:
+1. Reads the CLAUDE.md for patterns and best practices
+2. Uses the core functions as building blocks (no reinventing the wheel)
+3. Follows the standardized structure (always knows where code goes)
+4. Leverages embedded examples for synthetic data generation
+5. Applies learned lessons 
+
+This design means AI can focus on your specific business logic rather than infrastructure, resulting in working demos in minutes instead of hours.
 
 ## Configuration
 
