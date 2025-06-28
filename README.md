@@ -62,7 +62,7 @@ This framework is designed specifically for AI coding assistants. Here's why Cla
 The repository contains a comprehensive `CLAUDE.md` (identical to `.goosehints`) file that serves as an AI context document. This file:
 - Provides complete code patterns and examples for every common task
 - Documents all available functions with their exact signatures and return types
-- Contains best practices and common pitfalls (like mimesis date handling)
+- Contains best practices and common pitfalls (like [mimesis](https://mimesis.name/master/) date handling)
 - Includes working examples of synthetic data generation patterns
 
 ### 2. **Pre-built Core Functions**
@@ -80,8 +80,9 @@ demos/your_demo/
 ├── __init__.py      # Package marker
 ├── __main__.py      # Entry point
 ├── main.py          # Pipeline orchestrator
-└── datasets.py      # Synthetic data generation
+└── datasets.py      # Synthetic data generation using mimesis
 ```
+_[What is mimesis?](https://mimesis.name/master/)_
 
 ### 4. **AI-Optimized Workflow**
 When you ask Claude or Goose to create a demo, it:
