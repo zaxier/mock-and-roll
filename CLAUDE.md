@@ -318,10 +318,9 @@ def main():
 
 ## Synthetic Data Generation Guidelines
 - Use mimesis library for realistic synthetic datasets
-- Create 2-3 related datasets: one core fact table + reference/dimension tables
-- Ask user: star schema vs denormalized approach
-- **PREFERRED**: Use DataModel and Dataset classes for structured data handling
-- Write to Databricks Volume path in configured format (csv/json/parquet). Prefer PARQUET.
+- Create multiple related datasets that can be joined together and collectively form a data model.
+- **CRITICAL**: Use DataModel and Dataset classes for structured data handling
+- Write to Databricks Volume path in configured format.
 - **CRITICAL**: Read ai_docs/mimesis_usage_guide.md to avoid common issues
 - **CRITICAL**: Use the mimesis provider api reference below, between the tags: <mimesis_provider_api_reference> </mimesis_provider_api_reference>
 
