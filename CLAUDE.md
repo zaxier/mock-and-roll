@@ -461,17 +461,7 @@ python -m examples.sales_demo --help
 
 CLI arguments take highest precedence, overriding all other configuration sources.
 
-## Auto-Creation Behavior
-- Catalogs: Auto-creation disabled by default (requires explicit permission)
-- Schemas: Auto-creation enabled by default (common development need)
-- Volumes: Always auto-created if missing
-
 # AI-Native Development Patterns
-
-## Prompt Engineering Integration
-- High-quality prompts are strategically embedded in code
-- Use docstrings to guide AI agents on intended functionality
-- Self-documenting code that AI can understand and extend
 
 ## Agent-Optimized Patterns
 When generating new demos, follow these patterns:
@@ -521,7 +511,7 @@ transaction_date = generic.datetime.datetime(
 
 ## When Creating New Demos
 1. If the user doesn't specify, ask for a dataset type such as the source of data to mimic or a use case that needs to be fulfilled.
-2. Clarify requirements before code generation
+2. Clarify by asking the user questions if their specified requirements are vague before code generation
 3. **MANDATORY**: Use centralized CLI parsing with `from core import parse_demo_args`
 4. **Use the core and config modules in src**. E.g. use logging_config.py for logging. Use spark.py for setting up spark sessions. Etc.
 5. Use mimesis for realistic synthetic data generation
@@ -542,19 +532,16 @@ transaction_date = generic.datetime.datetime(
 - Do not create additional files unless explicitly required
 
 # Testing and Validation
-- Run `python -m pytest` for unit tests
 - Test demos end-to-end before client presentations. After building the code, run the demo end-to-end and attempt to fix any errors encountered.
 
 # Dependencies and Versions
 - Python 3.12+ required
-- databricks-connect>=16.3.0
+- databricks-connect>=16.4.0
 - mimesis>=18.0.0
 - pytest>=8.4.0
 - python-dotenv>=1.0.0
 - pyyaml>=6.0.2
 - pydantic>=2.0.0 (for Dataset and DataModel classes)
-
-Always confirm you're using compatible versions before implementation.
 
 # Interaction Guidelines
 - Ask for clarification when requirements are ambiguous
