@@ -5,25 +5,43 @@ Transform client demonstrations with AI-generated synthetic data pipelines.
 
 ## 🚀 Quick Start
 
+### Requirements
+- **Python 3.12+**
+- **[uv](https://docs.astral.sh/uv/)** - Fast Python package manager
+- **make** - Build automation tool (pre-installed on macOS/Linux). (Not strictly required)
+- **[Databricks CLI](https://docs.databricks.com/en/dev-tools/cli/index.html)** - For workspace authentication
+- **An AI Coding Assistant**:
+  - [Goose](https://github.com/square/goose) - AI-powered development agent
+  - [Claude Code](https://claude.ai/code) - Anthropic's CLI coding assistant
+  - Or similar AI coding tools for automated demo generation
+
 ### Zero-to-Demo in 5 Minutes
 ```bash
 # 1. Installation
 git clone <repo-url> && cd mock-and-roll
-make install
+make install  # or `uv sync`
 
-# 2. Activate python env (or use `uv run python...` instead of `python...` below)
-source .venv/bin/activate
-
-# 3. Authenticate to databricks workspace
+# 2. Authenticate to databricks workspace
 databricks auth login --host <workspace_url> --profile <profile_name>
 
-# 4. Configuration (minimal setup)
+# 3. Configuration (minimal setup)
 echo "DATABRICKS_CATALOG=<your_catalog>" > .env.local
 echo "DATABRICKS_SCHEMA=<your_schema>" >> .env.local
 echo "DATABRICKS_CONFIG_PROFILE=<profile_name>" >> .env.local
 
-# 5. Generate your first demo data to ensure everything is running smoothly
-python -m examples.sales_demo.main
+# 4. Activate python env (or skip and  use `uv run python...` below)
+source .venv/bin/activate
+
+# 5. Familiarise yourself with the CLI args for overrides
+python -m examples.sales_demo -h
+
+# 6. Run the example pipeline
+python -m examples.sales_demo --schema mock_and_roll_example
+   
+# 7. Create a custom demo - with Goose or Claude Code
+goose -t "Create a new synthetic data pipeline for [your industry] with [specific requirements/use cases]"
+# or 
+claude "Create a new synthetic data pipeline for [your industry] with [specific requirements/use cases]"
 ```
 
 ### Extend with CLI coding agent (Goose/Claude Code/Gemini CLI etc)
@@ -36,21 +54,9 @@ Watch as AI generates complete data pipelines—synthetic data creation, ingesti
 
 ### Why This Framework?
 - **🎯 Client-Ready Demos**: Generate industry-specific synthetic datasets instantly
-- **⚡ AI-Accelerated Development**: Prompt-driven pipeline creation using Claude Code
+- **⚡ AI-Accelerated Development**: Prompt-driven pipeline creation using Goose or Claude Code
 - **🏗️ Extensible Architecture**: Pre-built skeleton for rapid customization
 - **📊 Realistic Data**: Mimesis-powered synthetic data that mirrors real-world scenarios
-- **🔧 Zero-Config Demos**: Invisible configuration management for seamless presentations
-
-## 🌟 AI-Native Architecture
-
-### The Vision: Exponential AI Acceleration
-This repository showcases how modern coding agents are transforming software engineering.
-
-### Strategic Prompt Engineering
-High-quality prompts are strategically embedded throughout the codebase, enabling:
-- **Targeted Context Injection**: LLM attention mechanisms guide development decisions
-- **Self-Documenting Code**: AI agents understand purpose and extend functionality
-- **Exponential Scaling**: Patterns that amplify with AI capabilities
 
 ## 🔧 Framework Features
 
@@ -146,50 +152,6 @@ make show-config         # Display current configuration
 make drop-schema         # Drop Databricks schema
 make clean              # Clean build artifacts and caches
 ```
-
-## 📚 Getting Started
-
-### Prerequisites
-- Python 3.12+
-- `uv` package manager installed
-- Databricks workspace access (for full functionality)
-
-### Step-by-Step Setup
-
-1. **Clone and Install**
-   ```bash
-   git clone <repo-url>
-   cd mock-and-roll
-   make install
-   ```
-
-2. **Configure Environment**
-   Create your personal configuration file:
-   ```bash
-   # Minimal required configuration
-   echo "DATABRICKS_CATALOG=your_catalog" > .env.local  # Must exist, will not be automatically created
-   echo "DATABRICKS_SCHEMA=your_schema" >> .env.local  # Doesn't necessarily have to exist, will be created if allowed
-   echo "DATABRICKS_CONFIG_PROFILE=your_auth_profile >> .env.local
-   ```
-
-3. **Authenticate with Databricks** (if using Databricks features)
-   ```bash
-   databricks auth login --host https://your-workspace.cloud.databricks.com --profile your_auth_profile
-   ```
-
-4. **Verify Installation**
-   ```bash
-   make show-config  # Display current configuration
-   make test-unit    # Run unit tests
-   ```
-
-5. **Run Your First Demo**
-   ```bash
-   uv run python -m examples.sales_demo
-   
-   # Or with custom arguments
-   uv run python -m examples.sales_demo --schema custom_schema --records 1000
-   ```
 
 ### Available Commands
 Run `make help` to see all available commands, or refer to the [Development Commands](#-development-commands) section above.
