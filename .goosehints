@@ -816,3 +816,7 @@ for i in range(500):
 If you need additional capabilities beyond the core framework:
 - Consider web search tools for researching industry-specific patterns
 - Use MCP servers for additional data generation or processing capabilities
+
+# Important Instructions!
+- **CRITICAL**: When creating demos Do NOT change any code in the @src/core module or in @src/config module, just edit the code in the @src/demos directory
+- Keep any silver and gold layer transformations simple unless specifically asked for more complexity.
