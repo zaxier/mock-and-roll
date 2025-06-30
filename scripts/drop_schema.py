@@ -8,6 +8,7 @@ in Databricks environments. Useful for cleaning up development/demo data.
 Usage:
     python scripts/drop_schema.py                           # Interactive mode
     python scripts/drop_schema.py --schema my_schema        # Drop specific schema
+    python scripts/drop_schema.py --schema schema1 --schema schema2  # Drop multiple schemas
     python scripts/drop_schema.py --dry-run                 # Preview only
     python scripts/drop_schema.py --config-schema           # Use schema from config
     python scripts/drop_schema.py --help                    # Show this help
@@ -152,6 +153,22 @@ class SchemaDropper:
         
         return response.lower() in ['yes', 'y']
     
+    def confirm_multiple_drops(self, schema_names: list, all_contents: dict, total_objects: int) -> bool:
+        """Get user confirmation before dropping multiple schemas."""
+        print(f"\n⚠️  WARNING: This will permanently delete {len(schema_names)} schema(s) and ALL their contents!")
+        print(f"   This action cannot be undone.")
+        print(f"\n📊 Summary:")
+        print(f"   • Schemas to drop: {len(schema_names)}")
+        print(f"   • Total objects: {total_objects}")
+        
+        print(f"\n📂 Schemas to be dropped:")
+        for schema_name in schema_names:
+            contents = all_contents[schema_name]
+            print(f"   • {schema_name} ({contents['total_objects']} objects)")
+        
+        response = input(f"\nDrop all {len(schema_names)} schema(s) with {total_objects} total objects? (yes/no): ")
+        return response.lower() in ['yes', 'y']
+    
     def drop_schema(self, schema_name: str, dry_run: bool = False) -> bool:
         """Drop the specified schema with CASCADE."""
         try:
@@ -174,8 +191,8 @@ class SchemaDropper:
             self.logger.error(f"❌ Failed to drop schema: {e}")
             return False
     
-    def interactive_schema_selection(self) -> Optional[str]:
-        """Interactive schema selection."""
+    def interactive_schema_selection(self) -> Optional[list]:
+        """Interactive schema selection supporting multiple schemas."""
         try:
             # List available schemas in the catalog
             catalog_name = self.config.databricks.catalog
@@ -202,25 +219,70 @@ class SchemaDropper:
             for i, schema in enumerate(available_schemas, 1):
                 print(f"   {i}. {schema}")
             
+            print(f"\n💡 Instructions:")
+            print(f"   • Single schema: Enter number (e.g., '1')")
+            print(f"   • Multiple schemas: Enter numbers separated by commas (e.g., '1,3,5')")
+            print(f"   • Range: Enter range with dash (e.g., '1-3' for schemas 1, 2, 3)")
+            print(f"   • All schemas: Enter 'all'")
+            print(f"   • Quit: Enter 'q'")
+            
             while True:
                 try:
-                    choice = input(f"\nSelect schema to drop (1-{len(available_schemas)}) or 'q' to quit: ").strip()
+                    choice = input(f"\nSelect schema(s) to drop: ").strip()
                     if choice.lower() == 'q':
                         return None
                     
-                    index = int(choice) - 1
-                    if 0 <= index < len(available_schemas):
-                        return available_schemas[index]
+                    if choice.lower() == 'all':
+                        return available_schemas.copy()
+                    
+                    selected_schemas = []
+                    
+                    # Handle comma-separated choices
+                    if ',' in choice:
+                        parts = [p.strip() for p in choice.split(',')]
+                        for part in parts:
+                            if '-' in part:
+                                # Handle range
+                                start, end = map(int, part.split('-'))
+                                for i in range(start, end + 1):
+                                    if 1 <= i <= len(available_schemas):
+                                        schema = available_schemas[i - 1]
+                                        if schema not in selected_schemas:
+                                            selected_schemas.append(schema)
+                            else:
+                                # Handle single number
+                                index = int(part) - 1
+                                if 0 <= index < len(available_schemas):
+                                    schema = available_schemas[index]
+                                    if schema not in selected_schemas:
+                                        selected_schemas.append(schema)
+                    elif '-' in choice:
+                        # Handle range
+                        start, end = map(int, choice.split('-'))
+                        for i in range(start, end + 1):
+                            if 1 <= i <= len(available_schemas):
+                                schema = available_schemas[i - 1]
+                                if schema not in selected_schemas:
+                                    selected_schemas.append(schema)
                     else:
-                        print(f"❌ Invalid choice. Please enter 1-{len(available_schemas)}")
+                        # Handle single choice
+                        index = int(choice) - 1
+                        if 0 <= index < len(available_schemas):
+                            selected_schemas.append(available_schemas[index])
+                    
+                    if selected_schemas:
+                        return selected_schemas
+                    else:
+                        print(f"❌ Invalid selection. Please try again.")
+                        
                 except ValueError:
-                    print("❌ Invalid input. Please enter a number or 'q'")
+                    print("❌ Invalid input. Please enter numbers, ranges, or 'q'")
                     
         except Exception as e:
             self.logger.error(f"Failed to list schemas: {e}")
             return None
     
-    def run(self, schema_name: str = None, dry_run: bool = False, 
+    def run(self, schema_names: list = None, dry_run: bool = False, 
             use_config_schema: bool = False) -> bool:
         """Main execution logic."""
         print("🗑️  Schema Cleanup Tool")
@@ -230,40 +292,67 @@ class SchemaDropper:
         if not self.initialize_spark():
             return False
         
-        # Determine target schema
+        # Determine target schemas
         if use_config_schema:
-            schema_name = self.config.databricks.schema
-            print(f"🎯 Using schema from config: {schema_name}")
-        elif not schema_name:
-            schema_name = self.interactive_schema_selection()
-            if not schema_name:
+            schema_names = [self.config.databricks.schema]
+            print(f"🎯 Using schema from config: {schema_names[0]}")
+        elif not schema_names:
+            schema_names = self.interactive_schema_selection()
+            if not schema_names:
                 print("👋 Operation cancelled")
                 return True
         
-        # Validate schema name
-        if not self.validate_schema_name(schema_name):
+        # Ensure schema_names is a list
+        if isinstance(schema_names, str):
+            schema_names = [schema_names]
+        
+        # Validate all schema names
+        valid_schemas = []
+        for schema_name in schema_names:
+            if not self.validate_schema_name(schema_name):
+                continue
+            
+            # Check if schema exists
+            if not self.schema_exists(schema_name):
+                catalog_name = self.config.databricks.catalog
+                print(f"❌ Schema '{catalog_name}.{schema_name}' does not exist")
+                continue
+            
+            valid_schemas.append(schema_name)
+        
+        if not valid_schemas:
+            print("❌ No valid schemas to drop")
             return False
         
-        # Check if schema exists
-        if not self.schema_exists(schema_name):
-            catalog_name = self.config.databricks.catalog
-            print(f"❌ Schema '{catalog_name}.{schema_name}' does not exist")
-            return False
+        # Display information for all schemas
+        all_contents = {}
+        total_objects = 0
         
-        # Get schema contents
-        contents = self.get_schema_contents(schema_name)
+        for schema_name in valid_schemas:
+            contents = self.get_schema_contents(schema_name)
+            all_contents[schema_name] = contents
+            total_objects += contents['total_objects']
+            self.display_schema_info(schema_name, contents)
         
-        # Display schema information
-        self.display_schema_info(schema_name, contents)
-        
-        # Get confirmation (unless dry run)
+        # Get confirmation for all schemas (unless dry run)
         if not dry_run:
-            if not self.confirm_drop(schema_name, contents):
+            if not self.confirm_multiple_drops(valid_schemas, all_contents, total_objects):
                 print("👋 Operation cancelled")
                 return True
         
-        # Execute drop
-        return self.drop_schema(schema_name, dry_run)
+        # Execute drops
+        success_count = 0
+        for schema_name in valid_schemas:
+            if self.drop_schema(schema_name, dry_run):
+                success_count += 1
+            else:
+                print(f"❌ Failed to drop schema: {schema_name}")
+        
+        # Summary
+        if not dry_run:
+            print(f"\n📊 Summary: {success_count}/{len(valid_schemas)} schemas dropped successfully")
+        
+        return success_count == len(valid_schemas)
 
 
 def main():
@@ -275,7 +364,8 @@ def main():
     )
     parser.add_argument(
         '--schema',
-        help='Schema name to drop'
+        action='append',
+        help='Schema name to drop (can be used multiple times for multiple schemas)'
     )
     parser.add_argument(
         '--dry-run',
@@ -302,7 +392,7 @@ def main():
         # Create and run dropper
         dropper = SchemaDropper(config)
         success = dropper.run(
-            schema_name=args.schema,
+            schema_names=args.schema,
             dry_run=args.dry_run,
             use_config_schema=args.config_schema
         )
