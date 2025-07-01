@@ -39,7 +39,7 @@ python -m examples.sales_demo -h
 python -m examples.sales_demo --schema mock_and_roll_example
    
 # 7. Create a custom demo - with Goose or Claude Code
-goose -t "Create a new synthetic data pipeline for [your industry] with [specific requirements/use cases]"
+goose run -t "Create a new synthetic data pipeline for [your industry] with [specific requirements/use cases]"
 # or 
 claude "Create a new synthetic data pipeline for [your industry] with [specific requirements/use cases]"
 ```
