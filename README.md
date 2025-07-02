@@ -8,12 +8,8 @@ Transform client demonstrations with AI-generated synthetic data pipelines.
 ### Requirements
 - **Python 3.12+**
 - **[uv](https://docs.astral.sh/uv/)** - Fast Python package manager
-- **make** - Build automation tool (pre-installed on macOS/Linux). (Not strictly required)
 - **[Databricks CLI](https://docs.databricks.com/en/dev-tools/cli/index.html)** - For workspace authentication
-- **An AI Coding Assistant**:
-  - [Goose](https://github.com/square/goose) - AI-powered development agent
-  - [Claude Code](https://claude.ai/code) - Anthropic's CLI coding assistant
-  - Or similar AI coding tools for automated demo generation
+- **AI Coding Assistant**: [Goose](https://github.com/square/goose) or [Claude Code](https://claude.ai/code)
 
 ### Zero-to-Demo in 5 Minutes
 ```bash
@@ -44,152 +40,64 @@ goose run -t "Create a new synthetic data pipeline for [your industry] with [spe
 claude "Create a new synthetic data pipeline for [your industry] with [specific requirements/use cases]"
 ```
 
-Watch as AI generates complete data pipelines—synthetic data creation, ingestion, ETL—all orchestrated seamlessly.
+## 🎯 Why This Framework?
 
-## 🎯 Perfect for Databricks Solution Architects
+- **Client-Ready Demos**: Generate industry-specific synthetic datasets instantly
+- **AI-Accelerated Development**: Prompt-driven pipeline creation using AI assistants
+- **Extensible Architecture**: Pre-built skeleton for rapid customization
+- **Realistic Data**: [Mimesis](https://mimesis.name/master/)-powered synthetic data generation
 
-### Why This Framework?
-- **🎯 Client-Ready Demos**: Generate industry-specific synthetic datasets instantly
-- **⚡ AI-Accelerated Development**: Prompt-driven pipeline creation using Goose or Claude Code
-- **🏗️ Extensible Architecture**: Pre-built skeleton for rapid customization
-- **📊 Realistic Data**: Mimesis-powered synthetic data that mirrors real-world scenarios
+## 🤖 How AI Creates Demos in Minutes
 
-## 🤖 How AI Builds Demos So Easily
+The framework is designed for AI coding assistants through:
 
-This framework is designed specifically for AI coding assistants. Here's why Claude and other AI tools can generate complete synthetic data pipelines in seconds:
+1. **CLAUDE.md/.goosehints**: Comprehensive AI context with code patterns, function signatures, and best practices
+2. **Pre-built Core Functions**: Battle-tested utilities for Spark, I/O, catalog management, and CLI parsing
+3. **Standardized Structure**: Every demo follows the same 4-file pattern (init, main, datasets, entry point)
+4. **AI-Optimized Workflow**: AI reads patterns → uses core functions → follows structure → generates working demos
 
-### 1. **CLAUDE.md/.goosehints - The AI's Instruction Manual**
-The repository contains a comprehensive `CLAUDE.md` (identical to `.goosehints`) file that serves as an AI context document. This file:
-- Provides complete code patterns and examples for every common task
-- Documents all available functions with their exact signatures and return types
-- Contains best practices and common pitfalls (like [mimesis](https://mimesis.name/master/) date handling)
-- Includes working examples of synthetic data generation patterns
-
-### 2. **Pre-built Core Functions**
-The `src/core/` directory provides battle-tested building blocks:
-- **`spark.py`**: Handles Spark session creation automatically
-- **`io.py`**: Provides high-level data I/O operations (save/load to volumes)
-- **`catalog.py`**: Manages Databricks resources (catalogs, schemas, volumes)
-- **`cli.py`**: Standardized CLI argument parsing for all demos
-- **`data.py`**: Pydantic models (Dataset, DataModel) for structured data handling
-
-### 3. **Standardized Demo Structure**
-Every demo follows the same 4-file pattern:
+### Example AI Prompts
+```bash
+"Create a synthetic dataset for pharmaceutical clinical trials"
+"Generate a supply chain demo for automotive manufacturing"
+"Build a customer 360 pipeline for telecommunications"
 ```
-demos/your_demo/
-├── __init__.py      # Package marker
-├── __main__.py      # Entry point
-├── main.py          # Pipeline orchestrator
-└── datasets.py      # Synthetic data generation using mimesis
-```
-_[What is mimesis?](https://mimesis.name/master/)_
 
-### 4. **AI-Optimized Workflow**
-When you ask Claude or Goose to create a demo, it:
-1. Reads the CLAUDE.md or .goosehints for patterns and best practices
-2. Uses the core functions as building blocks (no reinventing the wheel)
-3. Follows the standardized structure (always knows where code goes)
-4. Leverages embedded examples for synthetic data generation
-5. Applies learned lessons 
-6. Tests and iterates on the code to ensure it runs
+## 🔧 Configuration
 
-This design means AI can focus on your specific business logic rather than infrastructure, resulting in working demos in minutes instead of hours.
+Layered configuration with increasing precedence:
+1. `config/base.yml` → 2. `config/environments/<ENV>.yml` → 3. `.env` → 4. `.env.local` → 5. Environment variables → 6. CLI arguments
 
-## Configuration
+> **Tip**: Use `.env.local` for personal settings and CLI args for runtime overrides.
 
-This repository uses a layered configuration system. Settings are applied with the following precedence (where the last one wins):
+## 🏗️ Architecture
 
-1. `config/base.yml` (Base defaults for the entire project)
-2. `config/environments/<ENV>.yml` (Environment-specific settings, e.g., `dev.yml`)
-3. `.env` (Team-level secrets and defaults, should be committed)
-4. `.env.local` (Your personal overrides, gitignored)
-5. **Environment Variables** (e.g., `export DATABRICKS_SCHEMA=my_schema`)
-6. **CLI Arguments** (e.g., `--schema my_schema`, highest priority)
-
-> **Note**: For most users, you shouldn't need to modify the `config/*.yml` files. The framework is designed to work out-of-the-box with sensible defaults. Use `.env.local` for personal overrides and CLI arguments for runtime customization.
-
-## 🏗️ Architecture Overview
-
-### Package Structure
 ```
 src/
-├── config/               # Multi-layer configuration (invisible in demos)
+├── config/               # Multi-layer configuration
 ├── core/                 # Reusable utilities (Spark, I/O, Catalog)
-├── examples/             # Demo templates for extension
-└── demos/[your_demo]/    # Generated demo pipelines
+├── examples/             # Demo templates
+└── demos/[your_demo]/    # AI-generated pipelines
 ```
 
-### Core Components
-- **`core/spark.py`**: Centralized Spark session management with serverless fallback
-- **`core/io.py`**: Volume I/O operations, delta writing, and high-level data operations
-- **`core/data.py`**: Pydantic data models for structured data handling (Dataset, DataModel)
-- **`core/catalog.py`**: Databricks resource management (catalogs, schemas, volumes)
-- **`core/logging_config.py`**: Centralized logging configuration for consistent output
-- **`config/`**: Multi-layer configuration system with .env support
+**Auto-Creation**: Volumes ✓ | Schemas ✓ | Catalogs ✗ (requires permission)
 
-### Auto-Creation Behavior
-- **Catalogs**: Auto-creation disabled by default (requires explicit permission)
-- **Schemas**: Auto-creation enabled by default (common development need)
-- **Volumes**: Always auto-created if missing
 
-## 🎨 Client Demonstration Workflow
-
-1. **Discovery**: Understand client's data architecture and use cases
-2. **Generation**: Use AI agent to create matching synthetic datasets
-3. **Pipeline Creation**: Generate ingestion, transformation, and analytics code
-4. **Deployment**: Auto-deploy to Databricks workspace
-5. **Demonstration**: Show end-to-end capabilities with realistic data
-
-### Example Customization
-```bash
-# Use Claude Code with prompts like:
-"Create a synthetic dataset for pharmaceutical clinical trials for a pharmaceutical company"
-"Generate a supply chain demo for automotive manufacturing"
-"Build a customer 360 pipeline for telecommunications company"
-```
-The more specific the better the result.
-
-## ⚡ Development Commands
+## ⚡ Development
 
 ```bash
-# Install dependencies and project
-make install
-
-# Run all tests
-make test
-
-# Run specific test suites
-make test-unit           # Unit tests only
-make test-integration    # Integration tests
-make test-spark          # Spark-dependent tests
-make test-databricks     # Databricks-dependent tests
-
-# Utility commands
-make show-config         # Display current configuration
-make drop-schema         # Drop Databricks schema
-make clean              # Clean build artifacts and caches
+make install         # Install dependencies
+make test           # Run all tests
+make show-config    # Display configuration
+make help           # See all commands
 ```
 
-### Available Commands
-Run `make help` to see all available commands, or refer to the [Development Commands](#-development-commands) section above.
+**CLI Arguments**: `--schema`, `--catalog`, `--volume`, `--records`, `--log-level`
 
-### Troubleshooting
-- **Virtual environment issues**: Run `make clean` then `make install`
-- **Configuration problems**: Use `make show-config` to verify settings
-- **Test failures**: Run specific test suites to isolate issues (`make test-unit`, `make test-spark`, etc.)
+## 📦 Key Dependencies
 
-## 🔧 Dependencies
-
-- Python 3.12+
-- `databricks-connect==16.4.1`
-- `databricks-dlt>=0.3.0`  # unused right now
-- `mimesis>=18.0.0`
-- `pandas>=2.2.3`
-- `pydantic>=2.11.7`
-- `pytest>=8.4.0`
-- `python-dotenv>=1.0.0`
-- `pyyaml>=6.0.2`
+Python 3.12+ | databricks-connect | mimesis | pandas | pydantic
 
 ---
 
-**Experience the future of data engineering demonstrations. Transform your client presentations with AI-generated synthetic data pipelines.**
+**Transform your client presentations with AI-generated synthetic data pipelines.**
