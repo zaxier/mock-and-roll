@@ -82,6 +82,8 @@ src/
 
 **Auto-Creation**: Volumes ✓ | Schemas ✓ | Catalogs ✗ (requires permission)
 
+## Example Data Lineage Output
+![Data Lineage](assets/lineage.png)
 
 ## ⚡ Development
 
