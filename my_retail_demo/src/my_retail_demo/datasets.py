@@ -1,0 +1,48 @@
+"""my_retail_demo Dataset Generation
+
+Generate synthetic datasets for Databricks demonstrations.
+Edit this file to define your data model.
+
+Use mimesis for realistic data generation. See CLAUDE.md for the full
+mimesis provider API reference and examples.
+"""
+
+from typing import List
+
+import random
+import pandas as pd
+from mimesis import Person, Finance, Datetime, Numeric, Address, Choice
+from mimesis.locales import Locale
+
+from .core import DataModel, Dataset, Config
+
+
+def generate_example_data(num_records: int = 100) -> pd.DataFrame:
+    """Generate example dataset. Replace this with your own data generation logic."""
+    person = Person(Locale.EN)
+    dt = Datetime()
+    address = Address()
+
+    return pd.DataFrame(
+        {
+            "id": [person.identifier() for _ in range(num_records)],
+            "name": [person.full_name() for _ in range(num_records)],
+            "email": [person.email() for _ in range(num_records)],
+            "city": [address.city() for _ in range(num_records)],
+            "created_at": [dt.date(start=2023, end=2026) for _ in range(num_records)],
+        }
+    )
+
+
+def generate_datamodel(config: Config, num_records: int = None) -> DataModel:
+    """Generate all datasets for the pipeline.
+
+    Customize this function to create your own data model with
+    related datasets, foreign keys, and realistic data patterns.
+    """
+    base_records = num_records or config.records
+
+    example_data = generate_example_data(base_records)
+    example_dataset = Dataset(name="example", data=example_data)
+
+    return DataModel(datasets=[example_dataset])

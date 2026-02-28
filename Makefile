@@ -1,6 +1,6 @@
 # Makefile for mock-and-roll
 
-.PHONY: all help install clean test test-unit test-integration test-spark test-databricks run-demo add-dep auth-databricks show-config drop-schema sync-docs
+.PHONY: all help install clean test test-unit test-integration
 
 VENV_DIR := .venv
 PYTHON := $(VENV_DIR)/bin/python
@@ -11,20 +11,15 @@ all: help
 
 help:
 	@echo "Available commands:"
-	@echo "  make install             - Install Python dependencies and project in editable mode."
-	@echo "  make clean               - Clean up build artifacts and caches."
-	@echo "  make test                - Run all tests."
-	@echo "  make test-unit           - Run unit tests."
-	@echo "  make test-integration    - Run integration tests."
-	@echo "  make test-spark          - Run Spark-dependent tests."
-	@echo "  make test-databricks     - Run Databricks-dependent tests."
-	@echo "  make show-config         - Display the current configuration."
-	@echo "  make drop-schema         - Drop a Databricks schema."
-	@echo "  make sync-docs           - Synchronize documentation."
+	@echo "  make install          - Install dependencies and project in editable mode"
+	@echo "  make clean            - Clean up build artifacts and caches"
+	@echo "  make test             - Run all tests"
+	@echo "  make test-unit        - Run unit tests"
+	@echo "  make test-integration - Run integration tests"
 
 install: $(VENV_DIR)
-	@echo "Installing dependencies and project in editable mode..."
-	$(UV) sync 
+	@echo "Installing dependencies..."
+	$(UV) sync --all-extras
 	@echo "Installation complete."
 
 $(VENV_DIR):
@@ -33,8 +28,8 @@ $(VENV_DIR):
 	@echo "Virtual environment created."
 
 clean:
-	@echo "Cleaning up build artifacts and caches..."
-	rm -rf $(VENV_DIR)
+	@echo "Cleaning up..."
+	rm -rf $(VENV_DIR) dist build *.egg-info
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 	find . -type f -name "*.pyc" -delete
 	rm -rf .pytest_cache .mypy_cache .ruff_cache
@@ -46,28 +41,8 @@ test:
 
 test-unit:
 	@echo "Running unit tests..."
-	$(PYTEST) -m unit
+	$(PYTEST) tests/unit/
 
 test-integration:
 	@echo "Running integration tests..."
-	$(PYTEST) -m integration
-
-test-spark:
-	@echo "Running Spark-dependent tests..."
-	$(PYTEST) -m spark
-
-test-databricks:
-	@echo "Running Databricks-dependent tests..."
-	$(PYTEST) -m databricks
-
-show-config:
-	@echo "Displaying current configuration..."
-	$(PYTHON) scripts/show_config.py
-
-drop-schema:
-	@echo "Dropping Databricks schema..."
-	$(PYTHON) scripts/drop_schema.py
-
-sync-docs:
-	@echo "Synchronizing documentation..."
-	$(PYTHON) scripts/sync_docs.py
+	$(PYTEST) tests/integration/

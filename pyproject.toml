@@ -4,23 +4,28 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mock-and-roll"
-version = "0.1.0"
-description = "AI Generated Databricks Demo"
+version = "1.0.0"
+description = "AI-powered synthetic data pipeline generator for Databricks"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "databricks-connect==16.4.1",
-    "databricks-dlt>=0.3.0",
-    "mimesis>=18.0.0",
-    "pandas>=2.2.3",
-    "pydantic>=2.11.7",
-    "pytest>=8.4.0",
-    "python-dotenv>=1.0.0",
-    "pyyaml>=6.0.2",
+    "click>=8.0",
+    "jinja2>=3.1",
+    "build>=1.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.4.0",
+    "pandas>=2.2.3",
+    "pydantic>=2.0.0",
+]
+
+[project.scripts]
+mock-and-roll = "mock_and_roll.cli:main"
+
 [tool.hatch.build.targets.wheel]
-packages = ["src"]
+packages = ["src/mock_and_roll"]
 
 [tool.hatch.build.targets.wheel.sources]
 "src" = ""

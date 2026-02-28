@@ -1,1 +1,0 @@
-# Financial Transactions Batch Demo Package
