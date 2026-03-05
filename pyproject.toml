@@ -19,6 +19,9 @@ dependencies = [
     "pyyaml>=6.0.2",
 ]
 
+[project.scripts]
+mock-and-roll = "mock_and_roll.cli:main"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
 

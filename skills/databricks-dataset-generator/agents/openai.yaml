@@ -1,0 +1,4 @@
+interface:
+  display_name: "Databricks Sample Data"
+  short_description: "Generate Delta sample datasets from prompts"
+  default_prompt: "Use $databricks-dataset-generator to turn this dataset request into a Delta table in Databricks."

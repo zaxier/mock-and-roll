@@ -1,105 +1,108 @@
+# Mock and Roll
 
-# AI-Native Demo Framework for Databricks Solution Architects
+`mock-and-roll` is a CLI-first tool for generating synthetic datasets and creating
+Delta tables directly in Databricks.
 
-Transform client demonstrations with AI-generated synthetic data pipelines.
+The project is intentionally scoped to:
+- infer a dataset spec from a user description
+- infer an interconnected multi-table model spec from a user description
+- generate sample rows with `mimesis`
+- write results straight to Delta tables
 
-## 🚀 Quick Start
+It does not implement volume ingestion pipelines or Spark transformation pipelines.
 
-### Requirements
-- **Python 3.12+**
-- **[uv](https://docs.astral.sh/uv/)** - Fast Python package manager
-- **[Databricks CLI](https://docs.databricks.com/en/dev-tools/cli/index.html)** - For workspace authentication
-- **AI Coding Assistant**: [Goose](https://github.com/square/goose) or [Claude Code](https://claude.ai/code)
+## Install
 
-### Zero-to-Demo in 5 Minutes
 ```bash
-# 1. Installation
-git clone https://github.com/zaxier/mock-and-roll.git && cd mock-and-roll
-make install  # or `uv sync`
+uv sync
+```
 
-# 2. Authenticate to databricks workspace
+## Configure Databricks Auth
+
+```bash
 databricks auth login --host <workspace_url> --profile <profile_name>
-
-# 3. Configuration (minimal setup)
-echo "DATABRICKS_CATALOG=<your_catalog>" > .env.local
-echo "DATABRICKS_SCHEMA=<your_schema>" >> .env.local
-echo "DATABRICKS_CONFIG_PROFILE=<profile_name>" >> .env.local
-
-# 4. Activate python env (or skip and  use `uv run python...` below)
-source .venv/bin/activate
-
-# 5. Familiarise yourself with the CLI args for overrides
-python -m examples.sales_demo -h
-
-# 6. Run the example pipeline
-python -m examples.sales_demo --schema mock_and_roll_example
-   
-# 7. Create a custom demo - with Goose or Claude Code
-goose run -t "Create a new synthetic data pipeline for [your industry] with [specific requirements/use cases]"
-# or 
-claude "Create a new synthetic data pipeline for [your industry] with [specific requirements/use cases]"
 ```
 
-## 🎯 Why This Framework?
-
-- **Client-Ready Demos**: Generate industry-specific synthetic datasets instantly
-- **AI-Accelerated Development**: Prompt-driven pipeline creation using AI assistants
-- **Extensible Architecture**: Pre-built skeleton for rapid customization
-- **Realistic Data**: [Mimesis](https://mimesis.name/master/)-powered synthetic data generation
-
-## 🤖 How AI Creates Demos in Minutes
-
-The framework is designed for AI coding assistants through:
-
-1. **CLAUDE.md/.goosehints**: Comprehensive AI context with code patterns, function signatures, and best practices
-2. **Pre-built Core Functions**: Battle-tested utilities for Spark, I/O, catalog management, and CLI parsing
-3. **Standardized Structure**: Every demo follows the same 4-file pattern (init, main, datasets, entry point)
-4. **AI-Optimized Workflow**: AI reads patterns → uses core functions → follows structure → generates working demos
-
-### Example AI Prompts
-```bash
-"Create a synthetic dataset for pharmaceutical clinical trials"
-"Generate a supply chain demo for automotive manufacturing"
-"Build a customer 360 pipeline for telecommunications"
-```
-
-## 🔧 Configuration
-
-Layered configuration with increasing precedence:
-1. `config/base.yml` → 2. `config/environments/<ENV>.yml` → 3. `.env` → 4. `.env.local` → 5. Environment variables → 6. CLI arguments
-
-> **Tip**: Use `.env.local` for personal settings and CLI args for runtime overrides.
-
-## 🏗️ Architecture
-
-```
-src/
-├── config/               # Multi-layer configuration
-├── core/                 # Reusable utilities (Spark, I/O, Catalog)
-├── examples/             # Demo templates
-└── demos/[your_demo]/    # AI-generated pipelines
-```
-
-**Auto-Creation**: Volumes ✓ | Schemas ✓ | Catalogs ✗ (requires permission)
-
-## Example Data Lineage Output
-![Data Lineage](assets/lineage.png)
-
-## ⚡ Development
+Optional environment setup:
 
 ```bash
-make install         # Install dependencies
-make test           # Run all tests
-make show-config    # Display configuration
-make help           # See all commands
+echo "DATABRICKS_CONFIG_PROFILE=<profile_name>" > .env.local
 ```
 
-**CLI Arguments**: `--schema`, `--catalog`, `--volume`, `--records`, `--log-level`
+## CLI Commands
 
-## 📦 Key Dependencies
+### 1. Suggest a dataset spec
 
-Python 3.12+ | databricks-connect | mimesis | pandas | pydantic
+```bash
+uv run mock-and-roll suggest \
+  --description "Ecommerce sales orders with customer and payment fields" \
+  --catalog dev \
+  --schema sandbox \
+  --rows 2000 \
+  --output specs/orders.yml
+```
 
----
+### 2. Preview generated rows locally
 
-**Transform your client presentations with AI-generated synthetic data pipelines.**
+```bash
+uv run mock-and-roll preview --spec specs/orders.yml --limit 10
+```
+
+### 3. Create Delta table in Databricks
+
+```bash
+uv run mock-and-roll create --spec specs/orders.yml --profile <profile_name>
+```
+
+## Connected Data Models
+
+For realistic domain modeling (multiple joinable tables):
+
+```bash
+uv run mock-and-roll suggest-model \
+  --description "Atlassian data lake with behavioral data for Jira and Confluence" \
+  --catalog dev \
+  --schema sandbox \
+  --rows 10000 \
+  --output specs/atlassian_model.yml
+```
+
+```bash
+uv run mock-and-roll preview-model --spec specs/atlassian_model.yml --limit 5
+```
+
+```bash
+uv run mock-and-roll create-model --spec specs/atlassian_model.yml --profile <profile_name>
+```
+
+`preview-model` and `create-model` enforce FK-style relationships by sampling child key values from generated parent tables.
+
+## Spec Format
+
+```yaml
+name: sales_dataset
+description: Ecommerce orders
+catalog: dev
+schema: sandbox
+table: ecommerce_orders
+rows: 1000
+columns:
+  - name: order_id
+    type: string
+    generator: person.identifier
+    args:
+      mask: ORD-########
+  - name: amount
+    type: double
+    generator: finance.price
+    args:
+      minimum: 10
+      maximum: 250
+```
+
+## Developer Notes
+
+- Entry point: [src/mock_and_roll/cli.py](/Users/xavier.armitage/Library/CloudStorage/Dropbox/Repositories/dev/mock-and-roll/src/mock_and_roll/cli.py)
+- Spec models: [src/mock_and_roll/spec.py](/Users/xavier.armitage/Library/CloudStorage/Dropbox/Repositories/dev/mock-and-roll/src/mock_and_roll/spec.py)
+- Generation logic: [src/mock_and_roll/generator.py](/Users/xavier.armitage/Library/CloudStorage/Dropbox/Repositories/dev/mock-and-roll/src/mock_and_roll/generator.py)
+- Databricks writer: [src/mock_and_roll/databricks_writer.py](/Users/xavier.armitage/Library/CloudStorage/Dropbox/Repositories/dev/mock-and-roll/src/mock_and_roll/databricks_writer.py)

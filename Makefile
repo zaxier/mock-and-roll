@@ -1,6 +1,6 @@
 # Makefile for mock-and-roll
 
-.PHONY: all help install clean test test-unit test-integration test-spark test-databricks run-demo add-dep auth-databricks show-config drop-schema sync-docs
+.PHONY: all help install clean test test-unit test-integration test-spark test-databricks run-demo add-dep auth-databricks show-config drop-schema sync-docs suggest-spec preview-spec create-table suggest-model preview-model create-model
 
 VENV_DIR := .venv
 PYTHON := $(VENV_DIR)/bin/python
@@ -21,6 +21,12 @@ help:
 	@echo "  make show-config         - Display the current configuration."
 	@echo "  make drop-schema         - Drop a Databricks schema."
 	@echo "  make sync-docs           - Synchronize documentation."
+	@echo "  make suggest-spec        - Suggest dataset spec from DESCRIPTION."
+	@echo "  make preview-spec        - Preview generated rows from SPEC file."
+	@echo "  make create-table        - Create Delta table from SPEC file."
+	@echo "  make suggest-model       - Suggest connected model spec from DESCRIPTION."
+	@echo "  make preview-model       - Preview generated rows for each dataset in MODEL_SPEC."
+	@echo "  make create-model        - Create all Delta tables from MODEL_SPEC."
 
 install: $(VENV_DIR)
 	@echo "Installing dependencies and project in editable mode..."
@@ -71,3 +77,27 @@ drop-schema:
 sync-docs:
 	@echo "Synchronizing documentation..."
 	$(PYTHON) scripts/sync_docs.py
+
+suggest-spec:
+	@echo "Suggesting a dataset spec..."
+	$(UV) run mock-and-roll suggest --description "$(DESCRIPTION)" --catalog "$(CATALOG)" --schema "$(SCHEMA)" --output "$(OUTPUT)"
+
+preview-spec:
+	@echo "Previewing a generated dataset..."
+	$(UV) run mock-and-roll preview --spec "$(SPEC)"
+
+create-table:
+	@echo "Creating Delta table from spec..."
+	$(UV) run mock-and-roll create --spec "$(SPEC)"
+
+suggest-model:
+	@echo "Suggesting a connected model spec..."
+	$(UV) run mock-and-roll suggest-model --description "$(DESCRIPTION)" --catalog "$(CATALOG)" --schema "$(SCHEMA)" --output "$(OUTPUT)"
+
+preview-model:
+	@echo "Previewing generated model datasets..."
+	$(UV) run mock-and-roll preview-model --spec "$(MODEL_SPEC)"
+
+create-model:
+	@echo "Creating Delta tables from model spec..."
+	$(UV) run mock-and-roll create-model --spec "$(MODEL_SPEC)"
