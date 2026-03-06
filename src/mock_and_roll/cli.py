@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 
 from .databricks_writer import write_dataset_to_delta, write_model_to_delta
@@ -26,8 +27,15 @@ def build_parser() -> argparse.ArgumentParser:
     suggest.add_argument("--rows", type=int, default=1000, help="Row count for generated sample data.")
     suggest.add_argument("--output", help="Optional path to write YAML spec.")
 
-    suggest_model = subparsers.add_parser("suggest-model", help="Suggest a multi-table model spec from natural language.")
-    suggest_model.add_argument("--description", required=True, help="Free-text description of the target domain/model.")
+    suggest_model = subparsers.add_parser(
+        "suggest-model",
+        help="Bootstrap a templated multi-table model spec (manual edits required).",
+    )
+    suggest_model.add_argument(
+        "--description",
+        required=True,
+        help="Free-text description of the target domain/model used for template selection.",
+    )
     suggest_model.add_argument("--catalog", required=True, help="Target Databricks catalog.")
     suggest_model.add_argument("--schema", required=True, help="Target Databricks schema.")
     suggest_model.add_argument("--rows", type=int, default=1000, help="Base row count for model sizing.")
@@ -79,6 +87,10 @@ def run_suggest(args: argparse.Namespace) -> int:
 
 
 def run_suggest_model(args: argparse.Namespace) -> int:
+    print(
+        "Warning: suggest-model emits a template scaffold. Edit datasets, columns, and relationships for your domain before preview/create.",
+        file=sys.stderr,
+    )
     model_spec = suggest_model_spec(
         description=args.description,
         catalog=args.catalog,

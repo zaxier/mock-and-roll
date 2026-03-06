@@ -16,7 +16,7 @@ help:
 	@echo "  make suggest-spec        - Suggest dataset spec from DESCRIPTION."
 	@echo "  make preview-spec        - Preview generated rows from SPEC file."
 	@echo "  make create-table        - Create Delta table from SPEC file."
-	@echo "  make suggest-model       - Suggest connected model spec from DESCRIPTION."
+	@echo "  make suggest-model       - Bootstrap templated model spec from DESCRIPTION (optional)."
 	@echo "  make preview-model       - Preview generated rows for each dataset in MODEL_SPEC."
 	@echo "  make create-model        - Create all Delta tables from MODEL_SPEC."
 
@@ -50,7 +50,7 @@ create-table:
 	$(UV) run mock-and-roll create --spec "$(SPEC)"
 
 suggest-model:
-	@echo "Suggesting a connected model spec..."
+	@echo "Bootstrapping a connected model spec template (manual edits expected)..."
 	$(UV) run mock-and-roll suggest-model --description "$(DESCRIPTION)" --catalog "$(CATALOG)" --schema "$(SCHEMA)" --output "$(OUTPUT)"
 
 preview-model:

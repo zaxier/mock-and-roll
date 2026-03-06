@@ -5,7 +5,7 @@ Delta tables directly in Databricks.
 
 The project is intentionally scoped to:
 - infer a dataset spec from a user description
-- infer an interconnected multi-table model spec from a user description
+- bootstrap a multi-table model spec template (then edit it for your domain)
 - generate sample rows with `mimesis`
 - write results straight to Delta tables
 
@@ -56,7 +56,26 @@ uv run mock-and-roll create --spec specs/orders.yml --profile <profile_name>
 
 ## Connected Data Models
 
-For realistic domain modeling (multiple joinable tables):
+For realistic domain modeling (multiple joinable tables), make the model spec directly, then preview/create:
+
+```bash
+# Start from the "Model example" in:
+# skills/databricks-dataset-generator/references/spec-guide.md
+# Then create and edit:
+$EDITOR specs/hft_model.yml
+```
+
+```bash
+uv run mock-and-roll preview-model --spec specs/hft_model.yml --limit 5
+```
+
+```bash
+uv run mock-and-roll create-model --spec specs/hft_model.yml --profile <profile_name>
+```
+
+`preview-model` and `create-model` enforce FK-style relationships by sampling child key values from generated parent tables.
+
+Optional bootstrap only (template output, requires manual rewrite):
 
 ```bash
 uv run mock-and-roll suggest-model \
@@ -66,16 +85,6 @@ uv run mock-and-roll suggest-model \
   --rows 10000 \
   --output specs/atlassian_model.yml
 ```
-
-```bash
-uv run mock-and-roll preview-model --spec specs/atlassian_model.yml --limit 5
-```
-
-```bash
-uv run mock-and-roll create-model --spec specs/atlassian_model.yml --profile <profile_name>
-```
-
-`preview-model` and `create-model` enforce FK-style relationships by sampling child key values from generated parent tables.
 
 ## Spec Format
 
