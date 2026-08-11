@@ -1,4 +1,6 @@
 
+</think>
+
 # AI-Native Demo Framework for Databricks Solution Architects
 
 Transform client demonstrations with AI-generated synthetic data pipelines.
@@ -25,7 +27,7 @@ echo "DATABRICKS_CATALOG=<your_catalog>" > .env.local
 echo "DATABRICKS_SCHEMA=<your_schema>" >> .env.local
 echo "DATABRICKS_CONFIG_PROFILE=<profile_name>" >> .env.local
 
-# 4. Activate python env (or skip and  use `uv run python...` below)
+# 4. Activate python env (or skip and use `uv run python...` below)
 source .venv/bin/activate
 
 # 5. Familiarise yourself with the CLI args for overrides
@@ -38,6 +40,8 @@ python -m examples.sales_demo --schema mock_and_roll_example
 goose run -t "Create a new synthetic data pipeline for [your industry] with [specific requirements/use cases]"
 # or 
 claude "Create a new synthetic data pipeline for [your industry] with [specific requirements/use cases]"
+
+> 💡 **Tip**: The AI will automatically scaffold the demo in `src/demos/<demo_name>/` with the required 4 files (`__init__.py`, `__main__.py`, `main.py`, `datasets.py`). Avoid modifying `src/core/` or `src/config/` to maintain framework stability.
 ```
 
 ## 🎯 Why This Framework?
